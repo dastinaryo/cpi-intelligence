@@ -306,6 +306,13 @@ const MapDashboard = () => {
     <div className="fixed inset-0">
       <div ref={containerRef} className="absolute inset-0" />
 
+      {/* Hover tooltip — follows the cursor */}
+      <div
+        ref={tooltipRef}
+        className="pointer-events-none absolute left-0 top-0 z-20 rounded-md border border-border bg-card/95 px-2.5 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur transition-opacity duration-100"
+        style={{ opacity: 0 }}
+      />
+
       {/* Legend */}
       <div className="pointer-events-none absolute bottom-6 left-4 z-10">
         <div className="pointer-events-auto rounded-lg border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur">
