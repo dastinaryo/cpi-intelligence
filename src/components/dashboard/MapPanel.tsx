@@ -36,7 +36,7 @@ const MapPanel = () => {
       <MapDashboard />
 
       {/* Top-left tabs (offset to clear the map navigation control) */}
-      <div className="pointer-events-none absolute left-24 top-4 z-10 flex gap-2">
+      <div className="pointer-events-none absolute left-16 top-4 z-10 flex gap-2">
         {TABS.map((t) => (
           <button
             key={t}
