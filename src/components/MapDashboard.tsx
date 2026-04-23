@@ -254,6 +254,12 @@ const MapDashboard = () => {
                 { hover: true },
               );
             }
+            const p = (f.properties || {}) as Record<string, unknown>;
+            const tipe = (p.TYPE_2 as string) || "";
+            const nama = (p.NAME_2 as string) || "—";
+            const prov = (p.NAME_1 as string) || "";
+            const label = `${tipe ? tipe + " " : ""}${nama}${prov ? ", " + prov : ""}`;
+            showTooltip(e.point.x, e.point.y, label);
           });
 
           map.on("mouseleave", "id-kabkota-fill", () => {
@@ -265,6 +271,7 @@ const MapDashboard = () => {
               );
             }
             hoveredKabIdRef.current = null;
+            hideTooltip();
           });
 
           map.on("click", "id-kabkota-fill", (e) => {
