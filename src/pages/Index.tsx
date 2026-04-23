@@ -9,7 +9,7 @@ const Index = () => (
 
       <section className="relative">
         <MapPanel />
-        <div className="pointer-events-none absolute left-4 top-4 z-20 hidden w-[280px] flex-col gap-3 lg:flex">
+        <div className="pointer-events-none absolute left-4 top-16 z-20 hidden w-[280px] flex-col gap-3 lg:flex">
           <div className="pointer-events-auto"><InsightCard title="Market Insights" /></div>
           <div className="pointer-events-auto"><InsightCard title="Supply Insights" /></div>
           <div className="pointer-events-auto"><InsightCard title="General Insights" /></div>
