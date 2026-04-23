@@ -22,7 +22,7 @@ const CommodityCard = ({ label, price, change, icon }: CommodityCardProps) => {
       <div
         className={cn(
           "flex items-center gap-0.5 text-xs font-medium tabular-nums",
-          positive ? "text-emerald-600" : "text-red-600",
+          positive ? "text-trend-up" : "text-trend-down",
         )}
       >
         {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
