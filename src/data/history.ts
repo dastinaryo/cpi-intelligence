@@ -1,0 +1,212 @@
+import type { CommodityHistory, StockHistory } from "@/types/dashboard";
+ 
+// 12 monthly data points: May 2023 – Apr 2024
+const months = [
+  "2023-05-01", "2023-06-01", "2023-07-01", "2023-08-01",
+  "2023-09-01", "2023-10-01", "2023-11-01", "2023-12-01",
+  "2024-01-01", "2024-02-01", "2024-03-01", "2024-04-01",
+];
+ 
+export const commodityHistories: CommodityHistory[] = [
+  // ─── JAGUNG LOCAL (IDR/kg) ────────────────────────────────
+  {
+    commodity: "jagung",
+    scope: "local",
+    currency: "IDR",
+    unit: "kg",
+    series: [
+      { date: months[0],  value: 4820 },
+      { date: months[1],  value: 4910 },
+      { date: months[2],  value: 5080 },
+      { date: months[3],  value: 5210 },
+      { date: months[4],  value: 5350 },
+      { date: months[5],  value: 5180 },
+      { date: months[6],  value: 5090 },
+      { date: months[7],  value: 5140 },
+      { date: months[8],  value: 5260 },
+      { date: months[9],  value: 5310 },
+      { date: months[10], value: 5390 },
+      { date: months[11], value: 5420 },
+    ],
+  },
+  // ─── AYAM LOCAL (IDR/kg) ─────────────────────────────────
+  {
+    commodity: "ayam",
+    scope: "local",
+    currency: "IDR",
+    unit: "kg",
+    series: [
+      { date: months[0],  value: 29800 },
+      { date: months[1],  value: 30200 },
+      { date: months[2],  value: 31500 },
+      { date: months[3],  value: 33100 },
+      { date: months[4],  value: 34200 },
+      { date: months[5],  value: 32800 },
+      { date: months[6],  value: 31900 },
+      { date: months[7],  value: 30500 },
+      { date: months[8],  value: 31200 },
+      { date: months[9],  value: 32400 },
+      { date: months[10], value: 32250 },
+      { date: months[11], value: 32150 },
+    ],
+  },
+  // ─── TELUR LOCAL (IDR/kg) ────────────────────────────────
+  {
+    commodity: "telur",
+    scope: "local",
+    currency: "IDR",
+    unit: "kg",
+    series: [
+      { date: months[0],  value: 25400 },
+      { date: months[1],  value: 25800 },
+      { date: months[2],  value: 26500 },
+      { date: months[3],  value: 27800 },
+      { date: months[4],  value: 28300 },
+      { date: months[5],  value: 27600 },
+      { date: months[6],  value: 27200 },
+      { date: months[7],  value: 27500 },
+      { date: months[8],  value: 28100 },
+      { date: months[9],  value: 28600 },
+      { date: months[10], value: 28610 },
+      { date: months[11], value: 28900 },
+    ],
+  },
+  // ─── JAGUNG GLOBAL (USD/bushel) ──────────────────────────
+  {
+    commodity: "jagung",
+    scope: "global",
+    currency: "USD",
+    unit: "bushel",
+    series: [
+      { date: months[0],  value: 5.84 },
+      { date: months[1],  value: 5.62 },
+      { date: months[2],  value: 5.41 },
+      { date: months[3],  value: 5.18 },
+      { date: months[4],  value: 4.95 },
+      { date: months[5],  value: 4.78 },
+      { date: months[6],  value: 4.61 },
+      { date: months[7],  value: 4.72 },
+      { date: months[8],  value: 4.85 },
+      { date: months[9],  value: 4.68 },
+      { date: months[10], value: 4.56 },
+      { date: months[11], value: 4.52 },
+    ],
+  },
+  // ─── AYAM GLOBAL (USD/lb) ────────────────────────────────
+  {
+    commodity: "ayam",
+    scope: "global",
+    currency: "USD",
+    unit: "lb",
+    series: [
+      { date: months[0],  value: 1.08 },
+      { date: months[1],  value: 1.11 },
+      { date: months[2],  value: 1.14 },
+      { date: months[3],  value: 1.19 },
+      { date: months[4],  value: 1.22 },
+      { date: months[5],  value: 1.20 },
+      { date: months[6],  value: 1.17 },
+      { date: months[7],  value: 1.15 },
+      { date: months[8],  value: 1.13 },
+      { date: months[9],  value: 1.15 },
+      { date: months[10], value: 1.17 },
+      { date: months[11], value: 1.18 },
+    ],
+  },
+  // ─── TELUR GLOBAL (USD/dozen) ────────────────────────────
+  {
+    commodity: "telur",
+    scope: "global",
+    currency: "USD",
+    unit: "dozen",
+    series: [
+      { date: months[0],  value: 2.82 },
+      { date: months[1],  value: 2.71 },
+      { date: months[2],  value: 2.58 },
+      { date: months[3],  value: 2.45 },
+      { date: months[4],  value: 2.39 },
+      { date: months[5],  value: 2.41 },
+      { date: months[6],  value: 2.48 },
+      { date: months[7],  value: 2.52 },
+      { date: months[8],  value: 2.44 },
+      { date: months[9],  value: 2.37 },
+      { date: months[10], value: 2.37 },
+      { date: months[11], value: 2.34 },
+    ],
+  },
+];
+ 
+export const stockHistories: StockHistory[] = [
+  // ─── CPIN (IDR) ──────────────────────────────────────────
+  {
+    ticker: "CPIN",
+    series: [
+      { date: months[0],  value: 5200 },
+      { date: months[1],  value: 5350 },
+      { date: months[2],  value: 5100 },
+      { date: months[3],  value: 4950 },
+      { date: months[4],  value: 4800 },
+      { date: months[5],  value: 4600 },
+      { date: months[6],  value: 4750 },
+      { date: months[7],  value: 4900 },
+      { date: months[8],  value: 5050 },
+      { date: months[9],  value: 5100 },
+      { date: months[10], value: 4960 },
+      { date: months[11], value: 4880 },
+    ],
+  },
+  // ─── JPFA (IDR) ──────────────────────────────────────────
+  {
+    ticker: "JPFA",
+    series: [
+      { date: months[0],  value: 1480 },
+      { date: months[1],  value: 1520 },
+      { date: months[2],  value: 1550 },
+      { date: months[3],  value: 1510 },
+      { date: months[4],  value: 1490 },
+      { date: months[5],  value: 1530 },
+      { date: months[6],  value: 1560 },
+      { date: months[7],  value: 1580 },
+      { date: months[8],  value: 1600 },
+      { date: months[9],  value: 1590 },
+      { date: months[10], value: 1601 },
+      { date: months[11], value: 1620 },
+    ],
+  },
+  // ─── MAIN (IDR) ──────────────────────────────────────────
+  {
+    ticker: "MAIN",
+    series: [
+      { date: months[0],  value: 750 },
+      { date: months[1],  value: 730 },
+      { date: months[2],  value: 715 },
+      { date: months[3],  value: 700 },
+      { date: months[4],  value: 680 },
+      { date: months[5],  value: 695 },
+      { date: months[6],  value: 710 },
+      { date: months[7],  value: 705 },
+      { date: months[8],  value: 698 },
+      { date: months[9],  value: 692 },
+      { date: months[10], value: 690 },
+      { date: months[11], value: 685 },
+    ],
+  },
+  // ─── SIPD (IDR) ──────────────────────────────────────────
+  {
+    ticker: "SIPD",
+    series: [
+      { date: months[0],  value: 108 },
+      { date: months[1],  value: 112 },
+      { date: months[2],  value: 115 },
+      { date: months[3],  value: 118 },
+      { date: months[4],  value: 121 },
+      { date: months[5],  value: 119 },
+      { date: months[6],  value: 122 },
+      { date: months[7],  value: 120 },
+      { date: months[8],  value: 118 },
+      { date: months[9],  value: 121 },
+      { date: months[10], value: 123 },
+      { date: months[11], value: 124 },
+    ],
+  },
+];
