@@ -53,20 +53,16 @@ const Index = () => {
           onSupplyPerspectiveChange={setSupplyPerspective}
         />
 
-        {/* Floating insight bar — bottom, horizontally scrollable, height matches legend */}
-        <div className="pointer-events-none absolute bottom-4 left-[22rem] right-4 z-20 h-[60px]">
-          <div className="pointer-events-auto h-full overflow-x-auto">
-            <div className="flex h-full gap-3">
-              <div className="h-full w-[26rem] shrink-0">
-                <InsightCard title="Market Insights" insight={insightMap.market} compact />
-              </div>
-              <div className="h-full w-[26rem] shrink-0">
-                <InsightCard title="Supply Insights" insight={insightMap.supply} compact />
-              </div>
-              <div className="h-full w-[26rem] shrink-0">
-                <InsightCard title="General Insights" insight={insightMap.general} compact />
-              </div>
-            </div>
+        {/* Floating insight cards over the map (offset left to clear the legend) */}
+        <div className="pointer-events-none absolute bottom-4 left-52 right-4 z-20 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="pointer-events-auto">
+            <InsightCard title="Market Insights" insight={insightMap.market} />
+          </div>
+          <div className="pointer-events-auto">
+            <InsightCard title="Supply Insights" insight={insightMap.supply} />
+          </div>
+          <div className="pointer-events-auto">
+            <InsightCard title="General Insights" insight={insightMap.general} />
           </div>
         </div>
       </section>

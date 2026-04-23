@@ -5,7 +5,6 @@ interface InsightCardProps {
   title: string;
   insight?: InsightContent;
   lines?: number;
-  compact?: boolean;
 }
 
 const toneClass: Record<string, string> = {
@@ -15,39 +14,8 @@ const toneClass: Record<string, string> = {
   recommendation: "bg-amber-500/80",
 };
 
-const InsightCard = ({ title, insight, lines = 4, compact = false }: InsightCardProps) => {
+const InsightCard = ({ title, insight, lines = 4 }: InsightCardProps) => {
   const items = insight?.items ?? [];
-
-  if (compact) {
-    const topItem = items[0];
-    return (
-      <div className="flex h-full items-center gap-3 rounded-lg border border-border bg-card/95 px-3 py-2 shadow-md backdrop-blur">
-        <div className="flex shrink-0 flex-col">
-          <span className="text-[11px] font-semibold leading-tight text-foreground">{title}</span>
-          <span className="inline-flex items-center gap-1 text-[9px] text-muted-foreground">
-            <Sparkles className="h-2.5 w-2.5" />
-            AI Generated
-          </span>
-        </div>
-        <div className="h-8 w-px bg-border" />
-        {topItem ? (
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <span
-              className={`h-1.5 w-1.5 shrink-0 rounded-full ${toneClass[topItem.type] ?? "bg-muted-foreground"}`}
-            />
-            <span className="line-clamp-2 text-[11px] leading-snug text-foreground/90">
-              {topItem.text}
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-1 flex-col gap-1.5">
-            <div className="h-1.5 w-3/4 rounded-full bg-muted" />
-            <div className="h-1.5 w-1/2 rounded-full bg-muted" />
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur">
