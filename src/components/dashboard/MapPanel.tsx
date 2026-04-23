@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Send, Sparkles, X } from "lucide-react";
+import { Bot, Send, Sparkles, X } from "lucide-react";
 import MapDashboard from "@/components/MapDashboard";
 import { cn } from "@/lib/utils";
 
@@ -49,20 +49,20 @@ const MapPanel = () => {
       </div>
 
       {/* Top-right AI Assistant */}
-      <div className="pointer-events-none absolute right-4 top-4 z-10">
+      <div className="pointer-events-none absolute right-4 top-4 z-30">
         <button
           type="button"
           onClick={() => setChatOpen((v) => !v)}
           className="pointer-events-auto inline-flex items-center gap-2 rounded-md border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm backdrop-blur hover:bg-accent"
         >
-          <Search className="h-3.5 w-3.5 text-muted-foreground" />
+          <Bot className="h-3.5 w-3.5 text-primary" />
           AI Assistant
         </button>
       </div>
 
       {/* Floating AI Assistant chat */}
       {chatOpen && (
-        <div className="pointer-events-auto absolute right-4 top-16 z-20 flex h-[420px] w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
+        <div className="pointer-events-auto absolute right-4 top-16 z-30 flex h-[420px] w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
             <div className="flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
