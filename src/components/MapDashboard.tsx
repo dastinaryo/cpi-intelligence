@@ -37,12 +37,26 @@ const valueFor = (code: string): number => {
 
 const MapDashboard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const hoveredIdRef = useRef<string | number | null>(null);
   const hoveredKabIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    const showTooltip = (x: number, y: number, text: string) => {
+      const el = tooltipRef.current;
+      if (!el) return;
+      el.textContent = text;
+      el.style.transform = `translate(${x + 12}px, ${y + 12}px)`;
+      el.style.opacity = "1";
+    };
+    const hideTooltip = () => {
+      const el = tooltipRef.current;
+      if (!el) return;
+      el.style.opacity = "0";
+    };
 
     const map = new maplibregl.Map({
       container: containerRef.current,
@@ -149,6 +163,13 @@ const MapDashboard = () => {
               { hover: true },
             );
           }
+          // Don't show country tooltip if a kabupaten is also under the cursor
+          // (kabupaten layer is rendered above and handled separately).
+          if (hoveredKabIdRef.current === null) {
+            const p = (f.properties || {}) as Record<string, unknown>;
+            const name = (p.ADMIN || p.NAME || p.name || "—") as string;
+            showTooltip(e.point.x, e.point.y, name);
+          }
         });
 
         map.on("mouseleave", "countries-fill", () => {
@@ -160,6 +181,7 @@ const MapDashboard = () => {
             );
           }
           hoveredIdRef.current = null;
+          if (hoveredKabIdRef.current === null) hideTooltip();
         });
 
         map.on("click", "countries-fill", (e) => {
@@ -232,6 +254,12 @@ const MapDashboard = () => {
                 { hover: true },
               );
             }
+            const p = (f.properties || {}) as Record<string, unknown>;
+            const tipe = (p.TYPE_2 as string) || "";
+            const nama = (p.NAME_2 as string) || "—";
+            const prov = (p.NAME_1 as string) || "";
+            const label = `${tipe ? tipe + " " : ""}${nama}${prov ? ", " + prov : ""}`;
+            showTooltip(e.point.x, e.point.y, label);
           });
 
           map.on("mouseleave", "id-kabkota-fill", () => {
@@ -243,6 +271,7 @@ const MapDashboard = () => {
               );
             }
             hoveredKabIdRef.current = null;
+            hideTooltip();
           });
 
           map.on("click", "id-kabkota-fill", (e) => {
@@ -276,6 +305,13 @@ const MapDashboard = () => {
   return (
     <div className="fixed inset-0">
       <div ref={containerRef} className="absolute inset-0" />
+
+      {/* Hover tooltip — follows the cursor */}
+      <div
+        ref={tooltipRef}
+        className="pointer-events-none absolute left-0 top-0 z-20 rounded-md border border-border bg-card/95 px-2.5 py-1.5 text-xs font-medium text-foreground shadow-md backdrop-blur transition-opacity duration-100"
+        style={{ opacity: 0 }}
+      />
 
       {/* Legend */}
       <div className="pointer-events-none absolute bottom-6 left-4 z-10">
