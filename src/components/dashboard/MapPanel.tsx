@@ -207,7 +207,7 @@ const MapPanel = ({
       )}
 
       {selection && (
-        <div className="pointer-events-none absolute left-4 top-20 bottom-[19rem] z-20 w-[260px] max-w-[calc(100%-2rem)]">
+        <div className="pointer-events-none absolute left-4 top-20 bottom-[15rem] z-20 w-[260px] max-w-[calc(100%-2rem)]">
           <div className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
             <div className="flex items-start justify-between gap-2 border-b border-border px-4 py-3">
               <div>
