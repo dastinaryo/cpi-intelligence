@@ -303,7 +303,7 @@ const MapDashboard = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0">
+    <div className="relative h-full w-full overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
 
       {/* Hover tooltip — follows the cursor */}
