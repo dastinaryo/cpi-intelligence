@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import worldMap from "@/assets/world-map.jpg";
 
 /**
  * Infinite pannable & zoomable canvas with a grid background.
@@ -31,10 +32,15 @@ const InfiniteCanvas = () => {
     let velocityY = 0;
     const friction = 0.92;
 
-    // --- Grid config ---
-    const baseGridSize = 50;
-
     let dpr = window.devicePixelRatio || 1;
+
+    // --- Texture ---
+    const img = new Image();
+    img.src = worldMap;
+    let imgReady = false;
+    img.onload = () => {
+      imgReady = true;
+    };
 
     const resize = () => {
       dpr = window.devicePixelRatio || 1;
@@ -50,44 +56,28 @@ const InfiniteCanvas = () => {
       const w = canvas.width;
       const h = canvas.height;
 
-      // Background
-      ctx.fillStyle = "#fafaf7";
+      // Ocean fallback
+      ctx.fillStyle = "#cfe7ee";
       ctx.fillRect(0, 0, w, h);
 
-      const gridSize = baseGridSize * scale * dpr;
-      const ox = (offsetX * dpr) % gridSize;
-      const oy = (offsetY * dpr) % gridSize;
+      if (!imgReady) return;
 
-      // Minor grid
-      ctx.beginPath();
-      ctx.strokeStyle = "#e5e5e0";
-      ctx.lineWidth = 1;
-      for (let x = ox; x < w; x += gridSize) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-      }
-      for (let y = oy; y < h; y += gridSize) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-      }
-      ctx.stroke();
+      const tileW = img.width * scale * dpr;
+      const tileH = img.height * scale * dpr;
+      if (tileW < 1 || tileH < 1) return;
 
-      // Major grid (every 5 cells)
-      const majorSize = gridSize * 5;
-      const mox = (offsetX * dpr) % majorSize;
-      const moy = (offsetY * dpr) % majorSize;
-      ctx.beginPath();
-      ctx.strokeStyle = "#c8c8c0";
-      ctx.lineWidth = 1.2;
-      for (let x = mox; x < w; x += majorSize) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
+      // Wrap offset into [-tileW, 0] and [-tileH, 0]
+      let startX = ((offsetX * dpr) % tileW) - tileW;
+      let startY = ((offsetY * dpr) % tileH) - tileH;
+      // Normalize negatives
+      if (startX > 0) startX -= tileW;
+      if (startY > 0) startY -= tileH;
+
+      for (let x = startX; x < w; x += tileW) {
+        for (let y = startY; y < h; y += tileH) {
+          ctx.drawImage(img, x, y, tileW, tileH);
+        }
       }
-      for (let y = moy; y < h; y += majorSize) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-      }
-      ctx.stroke();
     };
 
     const tick = () => {
