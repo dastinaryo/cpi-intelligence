@@ -107,20 +107,6 @@ const MapPanel = ({
     },
   ];
 
-  const suggestedQuestions = useMemo(
-    () =>
-      aiQuestions
-        .filter((item) => item.relevantScope === "both" || item.relevantScope === commodityScope)
-        .filter(
-          (item) =>
-            item.category === dashboardMode ||
-            item.category === "general" ||
-            item.category === "regional",
-        )
-        .slice(0, 5),
-    [commodityScope, dashboardMode],
-  );
-
   const contextSeed = useMemo(() => {
     const lines = [
       `Scope: ${commodityScope === "local" ? "Local" : "Global"}`,
@@ -349,34 +335,6 @@ const MapPanel = ({
               >
                 <X className="h-4 w-4" />
               </button>
-            </div>
-          </div>
-
-          <div className="border-b border-border px-3 py-2">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Suggested Questions
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {suggestedQuestions.map((question) => (
-                <button
-                  key={question.id}
-                  type="button"
-                  onClick={() => sendMessage(question.question)}
-                  className="rounded-md border border-border bg-background px-2 py-1 text-left text-[10px] text-foreground hover:bg-accent"
-                >
-                  {question.question}
-                </button>
-              ))}
-            </div>
-            <div className="mt-2 rounded-md bg-secondary/70 px-2 py-1.5">
-              <p className="mb-1 text-[10px] font-semibold text-secondary-foreground">Context Seed</p>
-              <ul className="space-y-0.5">
-                {contextSeed.map((line) => (
-                  <li key={line} className="text-[10px] text-secondary-foreground/90">
-                    {line}
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
 
