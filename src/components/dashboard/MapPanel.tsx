@@ -207,9 +207,9 @@ const MapPanel = ({
       )}
 
       {selection && (
-        <div className="pointer-events-none absolute left-4 top-16 z-20 w-[320px] max-w-[calc(100%-2rem)]">
-          <div className="pointer-events-auto rounded-xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur">
-            <div className="mb-2 flex items-start justify-between gap-2">
+        <div className="pointer-events-none absolute left-4 top-20 bottom-[15rem] z-20 w-[260px] max-w-[calc(100%-2rem)]">
+          <div className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
+            <div className="flex items-start justify-between gap-2 border-b border-border px-4 py-3">
               <div>
                 <h3 className="text-sm font-semibold text-foreground">{selection.name}</h3>
                 <p className="text-xs text-muted-foreground">
@@ -221,6 +221,7 @@ const MapPanel = ({
               </span>
             </div>
 
+            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {dashboardMode === "market" ? (
               <div className="space-y-1.5 text-xs text-foreground/90">
                 {selection.region ? (
@@ -282,19 +283,20 @@ const MapPanel = ({
             )}
 
             {relatedSignals.length > 0 && (
-              <div className="mt-3 border-t border-border pt-2">
+              <div className="border-t border-border pt-2">
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Risk Signals
                 </p>
                 <ul className="space-y-1">
                   {relatedSignals.map((signal) => (
-                    <li key={signal.id} className="line-clamp-2 text-[11px] text-foreground/85">
+                    <li key={signal.id} className="text-[11px] text-foreground/85">
                       {signal.title}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
+            </div>
           </div>
         </div>
       )}
