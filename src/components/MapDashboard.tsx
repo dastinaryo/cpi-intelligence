@@ -181,8 +181,8 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
         },
         layers: [{ id: "carto-light", type: "raster", source: "carto-light" }],
       },
-      center: scope === "local" ? [118, -2.5] : [105, 12],
-      zoom: scope === "local" ? 4.2 : 1.4,
+      center: scope === "local" ? [118, -2.5] : [118, -2.5],
+      zoom: scope === "local" ? 4.2 : 2.2,
       attributionControl: { compact: true },
     });
 
