@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { ChevronDown, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  ChevronDown,
+  TrendingDown,
+  TrendingUp,
+  Wheat,
+  Drumstick,
+  Egg,
+  LineChart,
+  Building2,
+} from "lucide-react";
 import CommodityCard from "./CommodityCard";
 import { cn } from "@/lib/utils";
 import {
@@ -10,10 +19,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const COMMODITIES = [
-  { label: "Harga Jagung", price: "Rp 5.420", change: 0.2 },
-  { label: "Harga Ayam", price: "Rp 32.150", change: -0.3 },
-  { label: "Harga Telur", price: "Rp 28.900", change: 1.0 },
-  { label: "CPIN", price: "Rp 4.880", change: -0.5 },
+  { label: "Harga Jagung", price: "Rp 5.420", change: 0.2, icon: <Wheat className="h-5 w-5" /> },
+  { label: "Harga Ayam", price: "Rp 32.150", change: -0.3, icon: <Drumstick className="h-5 w-5" /> },
+  { label: "Harga Telur", price: "Rp 28.900", change: 1.0, icon: <Egg className="h-5 w-5" /> },
+  { label: "CPIN", price: "Rp 4.880", change: -0.5, icon: <LineChart className="h-5 w-5" /> },
 ];
 
 const COMPETITORS = [
@@ -30,7 +39,7 @@ const CompetitorStockCard = () => {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-        <span className="text-xs font-semibold">{current.label.slice(0, 2)}</span>
+        <Building2 className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-semibold tabular-nums text-foreground">{current.price}</div>
@@ -40,7 +49,7 @@ const CompetitorStockCard = () => {
               type="button"
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
             >
-              Saham {current.label}
+              {current.label}
               <ChevronDown className="h-3 w-3" />
             </button>
           </DropdownMenuTrigger>
