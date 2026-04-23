@@ -85,11 +85,11 @@ const MapDashboard = () => {
       },
       center: [118, -2.5],
       zoom: 4.2,
-      attributionControl: false,
+      attributionControl: { compact: true },
     });
     mapRef.current = map;
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
     map.scrollZoom.setWheelZoomRate(1 / 200); // smoother zoom
     map.dragRotate.disable();
     map.touchZoomRotate.disableRotation();
