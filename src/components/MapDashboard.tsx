@@ -13,6 +13,10 @@ import "maplibre-gl/dist/maplibre-gl.css";
 const COUNTRIES_URL =
   "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
 
+// Indonesia administrative level 2 (kabupaten/kota) — 394 features.
+const INDONESIA_KABKOTA_URL =
+  "https://raw.githubusercontent.com/rifani/geojson-political-indonesia/master/IDN_adm_2_kabkota.json";
+
 // Blue gradient (light → dark) used for the choropleth + legend.
 const LEGEND_STOPS: { value: number; color: string }[] = [
   { value: 0, color: "#eaf3fb" },
