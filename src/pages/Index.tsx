@@ -1,5 +1,5 @@
-import InfiniteCanvas from "@/components/InfiniteCanvas";
+import MapDashboard from "@/components/MapDashboard";
 
-const Index = () => <InfiniteCanvas />;
+const Index = () => <MapDashboard />;
 
 export default Index;
