@@ -37,12 +37,26 @@ const valueFor = (code: string): number => {
 
 const MapDashboard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const hoveredIdRef = useRef<string | number | null>(null);
   const hoveredKabIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    const showTooltip = (x: number, y: number, text: string) => {
+      const el = tooltipRef.current;
+      if (!el) return;
+      el.textContent = text;
+      el.style.transform = `translate(${x + 12}px, ${y + 12}px)`;
+      el.style.opacity = "1";
+    };
+    const hideTooltip = () => {
+      const el = tooltipRef.current;
+      if (!el) return;
+      el.style.opacity = "0";
+    };
 
     const map = new maplibregl.Map({
       container: containerRef.current,
