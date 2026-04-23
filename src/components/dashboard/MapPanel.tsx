@@ -107,20 +107,6 @@ const MapPanel = ({
     },
   ];
 
-  const suggestedQuestions = useMemo(
-    () =>
-      aiQuestions
-        .filter((item) => item.relevantScope === "both" || item.relevantScope === commodityScope)
-        .filter(
-          (item) =>
-            item.category === dashboardMode ||
-            item.category === "general" ||
-            item.category === "regional",
-        )
-        .slice(0, 5),
-    [commodityScope, dashboardMode],
-  );
-
   const contextSeed = useMemo(() => {
     const lines = [
       `Scope: ${commodityScope === "local" ? "Local" : "Global"}`,
