@@ -39,6 +39,7 @@ const MapDashboard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
   const hoveredIdRef = useRef<string | number | null>(null);
+  const hoveredKabIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -172,6 +173,94 @@ const MapDashboard = () => {
             value: p.value,
           });
         });
+
+        // ---- Indonesia kabupaten/kota overlay ----
+        try {
+          const kabRes = await fetch(INDONESIA_KABKOTA_URL);
+          const kab = await kabRes.json();
+          kab.features.forEach((f: GeoJSON.Feature, i: number) => {
+            f.id = i;
+          });
+
+          map.addSource("id-kabkota", { type: "geojson", data: kab });
+
+          map.addLayer({
+            id: "id-kabkota-fill",
+            type: "fill",
+            source: "id-kabkota",
+            paint: {
+              "fill-color": "#08519c",
+              "fill-opacity": [
+                "case",
+                ["boolean", ["feature-state", "hover"], false],
+                0.55,
+                0.15,
+              ],
+            },
+          });
+
+          map.addLayer({
+            id: "id-kabkota-outline",
+            type: "line",
+            source: "id-kabkota",
+            paint: {
+              "line-color": "#08519c",
+              "line-width": [
+                "case",
+                ["boolean", ["feature-state", "hover"], false],
+                1.4,
+                0.4,
+              ],
+              "line-opacity": 0.7,
+            },
+          });
+
+          map.on("mousemove", "id-kabkota-fill", (e) => {
+            if (!e.features?.length) return;
+            const f = e.features[0] as MapGeoJSONFeature;
+            map.getCanvas().style.cursor = "pointer";
+            if (hoveredKabIdRef.current !== null) {
+              map.setFeatureState(
+                { source: "id-kabkota", id: hoveredKabIdRef.current },
+                { hover: false },
+              );
+            }
+            hoveredKabIdRef.current = f.id ?? null;
+            if (hoveredKabIdRef.current !== null) {
+              map.setFeatureState(
+                { source: "id-kabkota", id: hoveredKabIdRef.current },
+                { hover: true },
+              );
+            }
+          });
+
+          map.on("mouseleave", "id-kabkota-fill", () => {
+            map.getCanvas().style.cursor = "";
+            if (hoveredKabIdRef.current !== null) {
+              map.setFeatureState(
+                { source: "id-kabkota", id: hoveredKabIdRef.current },
+                { hover: false },
+              );
+            }
+            hoveredKabIdRef.current = null;
+          });
+
+          map.on("click", "id-kabkota-fill", (e) => {
+            const f = e.features?.[0];
+            if (!f) return;
+            const p = f.properties || {};
+            // eslint-disable-next-line no-console
+            console.log("Kabupaten clicked:", {
+              kabupaten: p.NAME_2,
+              tipe: p.TYPE_2,
+              provinsi: p.NAME_1,
+              hasc: p.HASC_2,
+            });
+          });
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error("Failed to load Indonesia kabupaten GeoJSON", err);
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error("Failed to load countries GeoJSON", err);
