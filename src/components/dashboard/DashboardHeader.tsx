@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, TrendingDown, TrendingUp } from "lucide-react";
 import CommodityCard from "./CommodityCard";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +14,62 @@ const COMMODITIES = [
   { label: "Harga Ayam", price: "Rp 32.150", change: -0.3 },
   { label: "Harga Telur", price: "Rp 28.900", change: 1.0 },
   { label: "CPIN", price: "Rp 4.880", change: -0.5 },
-  { label: "JPFA", price: "Rp 1.620", change: 1.2 },
 ];
+
+const COMPETITORS = [
+  { label: "JPFA", price: "Rp 1.620", change: 1.2 },
+  { label: "MAIN", price: "Rp 685", change: -0.8 },
+  { label: "SIPD", price: "Rp 124", change: 0.5 },
+] as const;
+
+const CompetitorStockCard = () => {
+  const [selected, setSelected] = useState<string>(COMPETITORS[0].label);
+  const current = COMPETITORS.find((c) => c.label === selected) ?? COMPETITORS[0];
+  const positive = current.change >= 0;
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+        <span className="text-xs font-semibold">{current.label.slice(0, 2)}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold tabular-nums text-foreground">{current.price}</div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Saham {current.label}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-[8rem]">
+            {COMPETITORS.map((opt) => (
+              <DropdownMenuItem
+                key={opt.label}
+                onSelect={() => setSelected(opt.label)}
+                className="text-xs"
+              >
+                {opt.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div
+        className={cn(
+          "flex items-center gap-0.5 text-xs font-medium tabular-nums",
+          positive ? "text-trend-up" : "text-trend-down",
+        )}
+      >
+        {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+        {positive ? "+" : ""}
+        {current.change.toFixed(1)}%
+      </div>
+    </div>
+  );
+};
 
 interface SelectChipProps {
   label: string;
@@ -76,6 +131,7 @@ const DashboardHeader = () => {
         {COMMODITIES.map((c) => (
           <CommodityCard key={c.label} {...c} />
         ))}
+        <CompetitorStockCard />
       </div>
     </header>
   );
