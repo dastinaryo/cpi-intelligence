@@ -316,23 +316,30 @@ const MapDashboard = () => {
         style={{ opacity: 0 }}
       />
 
-      {/* Legend */}
-      <div className="pointer-events-none absolute bottom-6 left-4 z-10">
-        <div className="pointer-events-auto rounded-lg border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur">
-          <div className="mb-2 text-xs font-medium tracking-wide text-muted-foreground">
-            Index
+      {/* Legend — categorical variables */}
+      <div className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2">
+        <div className="pointer-events-auto w-44 rounded-lg border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur">
+          <div className="mb-2 text-xs font-semibold tracking-wide text-foreground">
+            Legend
           </div>
-          <div
-            className="h-2 w-44 rounded"
-            style={{
-              background: `linear-gradient(to right, ${LEGEND_STOPS.map((s) => s.color).join(",")})`,
-            }}
-          />
-          <div className="mt-1 flex w-44 justify-between text-[10px] text-muted-foreground">
-            <span>0</span>
-            <span>50</span>
-            <span>100</span>
-          </div>
+          <ul className="space-y-1.5">
+            {[
+              { color: "#08519c", label: "Sangat Tinggi" },
+              { color: "#2b7bb9", label: "Tinggi" },
+              { color: "#5fa1cb", label: "Sedang" },
+              { color: "#94c0df", label: "Rendah" },
+              { color: "#c6dcef", label: "Sangat Rendah" },
+              { color: "#eaf3fb", label: "Tidak Ada Data" },
+            ].map((item) => (
+              <li key={item.label} className="flex items-center gap-2">
+                <span
+                  className="h-3 w-3 rounded-sm border border-border"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="text-[11px] text-muted-foreground">{item.label}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
