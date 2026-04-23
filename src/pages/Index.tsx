@@ -1,6 +1,5 @@
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import InsightCard from "@/components/dashboard/InsightCard";
-import MapLegendChecklist from "@/components/dashboard/MapLegendChecklist";
 import MapPanel from "@/components/dashboard/MapPanel";
 
 const Index = () => (
@@ -8,16 +7,16 @@ const Index = () => (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
       <DashboardHeader />
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="order-2 lg:order-1">
-          <MapLegendChecklist />
-        </aside>
-        <div className="order-1 lg:order-2">
-          <MapPanel />
+      <section className="relative">
+        <MapPanel />
+        <div className="pointer-events-none absolute inset-y-4 right-4 z-10 hidden w-[300px] flex-col gap-3 lg:flex">
+          <div className="pointer-events-auto"><InsightCard title="Market Insights" /></div>
+          <div className="pointer-events-auto"><InsightCard title="Supply Insights" /></div>
+          <div className="pointer-events-auto"><InsightCard title="General Insights" /></div>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:hidden">
         <InsightCard title="Market Insights" />
         <InsightCard title="Supply Insights" />
         <InsightCard title="General Insights" />
