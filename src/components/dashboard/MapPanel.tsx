@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Send, Sparkles, X } from "lucide-react";
 import MapDashboard from "@/components/MapDashboard";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +8,22 @@ type Tab = (typeof TABS)[number];
 
 const MapPanel = () => {
   const [tab, setTab] = useState<Tab>("Mitra");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([
+    { role: "ai", text: "Hi! Saya AI Assistant. Tanyakan apa saja tentang data pada peta." },
+  ]);
+
+  const sendMessage = () => {
+    const text = input.trim();
+    if (!text) return;
+    setMessages((m) => [
+      ...m,
+      { role: "user", text },
+      { role: "ai", text: "Terima kasih, saya sedang memproses pertanyaan Anda…" },
+    ]);
+    setInput("");
+  };
 
   return (
     <div className="relative h-full min-h-[360px] w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm">
@@ -36,12 +52,76 @@ const MapPanel = () => {
       <div className="pointer-events-none absolute right-4 top-4 z-10">
         <button
           type="button"
+          onClick={() => setChatOpen((v) => !v)}
           className="pointer-events-auto inline-flex items-center gap-2 rounded-md border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm backdrop-blur hover:bg-accent"
         >
           <Search className="h-3.5 w-3.5 text-muted-foreground" />
           AI Assistant
         </button>
       </div>
+
+      {/* Floating AI Assistant chat */}
+      {chatOpen && (
+        <div className="pointer-events-auto absolute right-4 top-16 z-20 flex h-[420px] w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
+          <div className="flex items-center justify-between border-b border-border px-3 py-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-sm font-semibold text-foreground">AI Assistant</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setChatOpen(false)}
+              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label="Close chat"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="flex-1 space-y-2 overflow-y-auto p-3">
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
+              >
+                <div
+                  className={cn(
+                    "max-w-[85%] rounded-lg px-3 py-2 text-xs leading-relaxed",
+                    m.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground",
+                  )}
+                >
+                  {m.text}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMessage();
+            }}
+            className="flex items-center gap-2 border-t border-border p-2"
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Tanyakan sesuatu…"
+              className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <button
+              type="submit"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground hover:opacity-90"
+              aria-label="Send"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
