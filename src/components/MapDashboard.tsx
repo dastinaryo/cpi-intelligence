@@ -89,7 +89,10 @@ const MapDashboard = () => {
     });
     mapRef.current = map;
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    map.addControl(
+      new maplibregl.NavigationControl({ showCompass: false, visualizePitch: false }),
+      "top-left",
+    );
     map.scrollZoom.setWheelZoomRate(1 / 200); // smoother zoom
     map.dragRotate.disable();
     map.touchZoomRotate.disableRotation();
