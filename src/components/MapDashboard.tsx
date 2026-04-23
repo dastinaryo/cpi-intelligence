@@ -163,6 +163,13 @@ const MapDashboard = () => {
               { hover: true },
             );
           }
+          // Don't show country tooltip if a kabupaten is also under the cursor
+          // (kabupaten layer is rendered above and handled separately).
+          if (hoveredKabIdRef.current === null) {
+            const p = (f.properties || {}) as Record<string, unknown>;
+            const name = (p.ADMIN || p.NAME || p.name || "—") as string;
+            showTooltip(e.point.x, e.point.y, name);
+          }
         });
 
         map.on("mouseleave", "countries-fill", () => {
@@ -174,6 +181,7 @@ const MapDashboard = () => {
             );
           }
           hoveredIdRef.current = null;
+          if (hoveredKabIdRef.current === null) hideTooltip();
         });
 
         map.on("click", "countries-fill", (e) => {
