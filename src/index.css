@@ -113,3 +113,13 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* MapLibre navigation control: render horizontally (landscape) */
+.maplibregl-ctrl-top-left .maplibregl-ctrl-group {
+  display: flex;
+  flex-direction: row;
+}
+.maplibregl-ctrl-top-left .maplibregl-ctrl-group > button + button {
+  border-top: none;
+  border-left: 1px solid hsl(var(--border));
+}
