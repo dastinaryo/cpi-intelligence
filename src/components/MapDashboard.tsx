@@ -317,7 +317,7 @@ const MapDashboard = () => {
       />
 
       {/* Legend — categorical variables */}
-      <div className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2">
+      <div className="pointer-events-none absolute bottom-4 left-4 z-20">
         <div className="pointer-events-auto w-44 rounded-lg border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur">
           <div className="mb-2 text-xs font-semibold tracking-wide text-foreground">
             Legend
