@@ -3,14 +3,15 @@ import maplibregl, { Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 /**
- * Light-mode interactive map dashboard for Indonesia (kabupaten/kota level).
- * - Carto Positron raster basemap
- * - Indonesia kabupaten/kota GeoJSON from public CDN
- * - Choropleth fill driven by a deterministic dummy `value` per region
+ * Light-mode interactive map dashboard built with MapLibre GL JS.
+ * - Carto Positron raster basemap (light, with admin boundaries baked in)
+ * - World countries GeoJSON loaded from a public CDN
+ * - Choropleth fill driven by a deterministic dummy `value` per country
  * - Hover highlight + click logs feature data
+ * - Bottom-left legend, top-left zoom controls
  */
-const REGIONS_URL =
-  "https://cdn.jsdelivr.net/gh/superpikar/indonesia-geojson@master/indonesia-district-simple.json";
+const COUNTRIES_URL =
+  "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
 
 // Blue gradient (light → dark) used for the choropleth + legend.
 const LEGEND_STOPS: { value: number; color: string }[] = [
@@ -63,8 +64,8 @@ const MapDashboard = () => {
           },
         ],
       },
-      center: [118, -2.5],
-      zoom: 4,
+      center: [10, 25],
+      zoom: 1.6,
       attributionControl: { compact: true },
     });
     mapRef.current = map;
@@ -76,30 +77,25 @@ const MapDashboard = () => {
 
     map.on("load", async () => {
       try {
-        const res = await fetch(REGIONS_URL);
+        const res = await fetch(COUNTRIES_URL);
         const geo = await res.json();
 
         // Inject deterministic `value` into each feature for the choropleth
         // and stable feature ids for hover state.
         geo.features.forEach((f: GeoJSON.Feature, i: number) => {
           const props = (f.properties || {}) as Record<string, unknown>;
-          const code =
-            (props.KAB_KOT as string) ||
-            (props.NAME_2 as string) ||
-            (props.kabkota as string) ||
-            (props.name as string) ||
-            String(i);
+          const code = (props.ISO_A3 as string) || (props.ADM0_A3 as string) || String(i);
           props.value = valueFor(code);
           f.properties = props;
           f.id = i;
         });
 
-        map.addSource("regions", { type: "geojson", data: geo });
+        map.addSource("countries", { type: "geojson", data: geo });
 
         map.addLayer({
-          id: "regions-fill",
+          id: "countries-fill",
           type: "fill",
-          source: "regions",
+          source: "countries",
           paint: {
             "fill-color": [
               "interpolate",
@@ -111,72 +107,70 @@ const MapDashboard = () => {
               "case",
               ["boolean", ["feature-state", "hover"], false],
               0.9,
-              0.7,
+              0.65,
             ],
           },
         });
 
         map.addLayer({
-          id: "regions-outline",
+          id: "countries-outline",
           type: "line",
-          source: "regions",
+          source: "countries",
           paint: {
             "line-color": "#ffffff",
             "line-width": [
               "case",
               ["boolean", ["feature-state", "hover"], false],
-              1.4,
-              0.3,
+              1.6,
+              0.4,
             ],
           },
         });
 
-        map.on("mousemove", "regions-fill", (e) => {
+        map.on("mousemove", "countries-fill", (e) => {
           if (!e.features?.length) return;
           const f = e.features[0] as MapGeoJSONFeature;
           map.getCanvas().style.cursor = "pointer";
           if (hoveredIdRef.current !== null) {
             map.setFeatureState(
-              { source: "regions", id: hoveredIdRef.current },
+              { source: "countries", id: hoveredIdRef.current },
               { hover: false },
             );
           }
           hoveredIdRef.current = f.id ?? null;
           if (hoveredIdRef.current !== null) {
             map.setFeatureState(
-              { source: "regions", id: hoveredIdRef.current },
+              { source: "countries", id: hoveredIdRef.current },
               { hover: true },
             );
           }
         });
 
-        map.on("mouseleave", "regions-fill", () => {
+        map.on("mouseleave", "countries-fill", () => {
           map.getCanvas().style.cursor = "";
           if (hoveredIdRef.current !== null) {
             map.setFeatureState(
-              { source: "regions", id: hoveredIdRef.current },
+              { source: "countries", id: hoveredIdRef.current },
               { hover: false },
             );
           }
           hoveredIdRef.current = null;
         });
 
-        map.on("click", "regions-fill", (e) => {
+        map.on("click", "countries-fill", (e) => {
           const f = e.features?.[0];
           if (!f) return;
-          const p = (f.properties || {}) as Record<string, unknown>;
+          const p = f.properties || {};
           // eslint-disable-next-line no-console
-          console.log("Kabupaten/Kota clicked:", {
-            kabupaten:
-              p.KAB_KOT || p.NAME_2 || p.kabkota || p.name,
-            provinsi: p.PROVINSI || p.NAME_1 || p.provinsi,
+          console.log("Region clicked:", {
+            name: p.ADMIN || p.NAME || p.name,
+            iso: p.ISO_A3 || p.ADM0_A3,
             value: p.value,
-            properties: p,
           });
         });
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error("Failed to load Indonesia regions GeoJSON", err);
+        console.error("Failed to load countries GeoJSON", err);
       }
     });
 
