@@ -54,7 +54,7 @@ const Index = () => {
         />
 
         {/* Floating insight cards beside the legend, matching its height */}
-        <div className="pointer-events-none absolute bottom-4 left-[14.5rem] right-4 z-20 grid h-72 grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="pointer-events-none absolute bottom-4 left-[14.5rem] right-4 z-20 grid h-56 grid-cols-1 gap-3 md:grid-cols-3">
           <div className="pointer-events-auto min-h-0">
             <InsightCard title="Market Insights" insight={insightMap.market} />
           </div>
