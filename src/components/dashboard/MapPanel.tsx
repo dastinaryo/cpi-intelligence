@@ -10,7 +10,7 @@ const MapPanel = () => {
   const [tab, setTab] = useState<Tab>("Mitra");
 
   return (
-    <div className="relative h-[60vh] min-h-[420px] w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+    <div className="relative h-full min-h-[360px] w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm">
       <MapDashboard />
 
       {/* Top-left tabs */}
