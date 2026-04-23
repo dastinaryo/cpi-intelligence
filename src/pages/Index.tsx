@@ -9,8 +9,8 @@ const Index = () => (
     <section className="relative min-h-0 flex-1">
       <MapPanel />
 
-      {/* Floating insight cards over the map */}
-      <div className="pointer-events-none absolute inset-x-4 bottom-4 z-20 grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* Floating insight cards over the map (offset left to clear the legend) */}
+      <div className="pointer-events-none absolute bottom-4 left-56 right-4 z-20 grid grid-cols-1 gap-3 md:grid-cols-3">
         <div className="pointer-events-auto">
           <InsightCard title="Market Insights" />
         </div>
