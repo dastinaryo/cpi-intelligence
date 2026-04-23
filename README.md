@@ -90,6 +90,20 @@ Run tests:
 npm run test -- --run
 ```
 
+## Claude Code (claude.ai/code)
+
+Project ini sudah dikonfigurasi untuk digunakan di [claude.ai/code](https://claude.ai/code).
+
+Saat sesi web dimulai, hook `.claude/hooks/session-start.sh` otomatis menjalankan `npm install` sehingga dependency langsung tersedia tanpa setup manual.
+
+**Setup:**
+1. Buka [claude.ai/code](https://claude.ai/code)
+2. Connect GitHub dan pilih repo ini
+3. Dependency akan terinstall otomatis saat sesi dimulai
+
+**Push perubahan ke GitHub** — cukup minta Claude:
+> "Commit dan push perubahan ini ke branch X"
+
 ## Catatan Placeholder
 - Perhitungan `recommended source` dan `estimated logistics cost` masih berbasis heuristic dataset (belum optimasi rute/logistik riil).
 - AI assistant masih mock/starter behavior (menggunakan dataset QnA + context seed), belum terhubung ke model backend produksi.
