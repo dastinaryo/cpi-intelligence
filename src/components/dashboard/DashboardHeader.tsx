@@ -1,13 +1,16 @@
-import { useState } from "react";
 import {
+  Building2,
   ChevronDown,
-  TrendingDown,
-  TrendingUp,
-  Wheat,
   Drumstick,
   Egg,
+  Factory,
   LineChart,
-  Building2,
+  Package,
+  ShoppingCart,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Wheat,
 } from "lucide-react";
 import CommodityCard from "./CommodityCard";
 import { cn } from "@/lib/utils";
@@ -17,23 +20,112 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  commodityPriceGlobal,
+  commodityPriceLocal,
+  countries,
+  mitraList,
+  pelangganList,
+  regions,
+  stocks,
+} from "@/data";
+import type {
+  CommodityScope,
+  DashboardMode,
+  StockTicker,
+  SupplyTab,
+} from "@/types/dashboard";
 
-const COMMODITIES = [
-  { label: "Harga Jagung", price: "Rp 5.420", change: 0.2, icon: <Wheat className="h-5 w-5" /> },
-  { label: "Harga Ayam", price: "Rp 32.150", change: -0.3, icon: <Drumstick className="h-5 w-5" /> },
-  { label: "Harga Telur", price: "Rp 28.900", change: 1.0, icon: <Egg className="h-5 w-5" /> },
-  { label: "CPIN", price: "Rp 4.880", change: -0.5, icon: <LineChart className="h-5 w-5" /> },
+interface DashboardHeaderProps {
+  commodityScope: CommodityScope;
+  dashboardMode: DashboardMode;
+  supplyPerspective: SupplyTab;
+  competitorTicker: StockTicker;
+  onCommodityScopeChange: (value: CommodityScope) => void;
+  onDashboardModeChange: (value: DashboardMode) => void;
+  onCompetitorChange: (value: StockTicker) => void;
+}
+
+const formatPrice = (value: number, currency: "IDR" | "USD") => {
+  if (currency === "IDR") {
+    return `Rp ${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(value)}`;
+  }
+
+  return `$${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(value)}`;
+};
+
+const formatCompact = (value: number) => new Intl.NumberFormat("id-ID").format(value);
+
+const COMPETITORS: StockTicker[] = ["JPFA", "MAIN", "SIPD"];
+
+const competitorOptions = COMPETITORS.map((ticker) => {
+  const stock = stocks.find((item) => item.ticker === ticker);
+  return {
+    ticker,
+    price: stock?.price ?? 0,
+    change: stock?.change ?? 0,
+  };
+});
+
+const scopeOptions: { label: string; value: CommodityScope }[] = [
+  { label: "Local", value: "local" },
+  { label: "Global", value: "global" },
 ];
 
-const COMPETITORS = [
-  { label: "JPFA", price: "Rp 1.620", change: 1.2 },
-  { label: "MAIN", price: "Rp 685", change: -0.8 },
-  { label: "SIPD", price: "Rp 124", change: 0.5 },
-] as const;
+const modeOptions: { label: string; value: DashboardMode }[] = [
+  { label: "Market", value: "market" },
+  { label: "Supply", value: "supply" },
+];
 
-const CompetitorStockCard = () => {
-  const [selected, setSelected] = useState<string>(COMPETITORS[0].label);
-  const current = COMPETITORS.find((c) => c.label === selected) ?? COMPETITORS[0];
+interface SelectChipProps<T extends string> {
+  label: string;
+  value: T;
+  options: { label: string; value: T }[];
+  onChange: (value: T) => void;
+}
+
+const SelectChip = <T extends string,>({ label, value, options, onChange }: SelectChipProps<T>) => {
+  const currentLabel = options.find((opt) => opt.value === value)?.label ?? value;
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground shadow-sm hover:bg-accent"
+          >
+            {currentLabel}
+            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-[8rem]">
+          {options.map((opt) => (
+            <DropdownMenuItem
+              key={opt.value}
+              onSelect={() => onChange(opt.value)}
+              className="text-xs"
+            >
+              {opt.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+};
+
+const CompetitorStockCard = ({
+  selected,
+  onChange,
+}: {
+  selected: StockTicker;
+  onChange: (ticker: StockTicker) => void;
+}) => {
+  const current = competitorOptions.find((item) => item.ticker === selected) ?? competitorOptions[0];
   const positive = current.change >= 0;
 
   return (
@@ -42,25 +134,27 @@ const CompetitorStockCard = () => {
         <Building2 className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-semibold tabular-nums text-foreground">{current.price}</div>
+        <div className="text-sm font-semibold tabular-nums text-foreground">
+          {formatPrice(current.price, "IDR")}
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
             >
-              {current.label}
+              {current.ticker}
               <ChevronDown className="h-3 w-3" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-[8rem]">
-            {COMPETITORS.map((opt) => (
+            {COMPETITORS.map((ticker) => (
               <DropdownMenuItem
-                key={opt.label}
-                onSelect={() => setSelected(opt.label)}
+                key={ticker}
+                onSelect={() => onChange(ticker)}
                 className="text-xs"
               >
-                {opt.label}
+                {ticker}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -80,67 +174,178 @@ const CompetitorStockCard = () => {
   );
 };
 
-interface SelectChipProps {
+type HeaderCardConfig = {
   label: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
-}
-const SelectChip = ({ label, value, options, onChange }: SelectChipProps) => (
-  <div className="flex items-center gap-2">
-    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-      {label}
-    </span>
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground shadow-sm hover:bg-accent"
-        >
-          {value}
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[8rem]">
-        {options.map((opt) => (
-          <DropdownMenuItem
-            key={opt}
-            onSelect={() => onChange(opt)}
-            className="text-xs"
-          >
-            {opt}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </div>
-);
+  price: string;
+  change: number;
+  icon: React.ReactNode;
+};
 
-const DashboardHeader = () => {
-  const [commodityScope, setCommodityScope] = useState("Local");
-  const [dashboardMode, setDashboardMode] = useState("Market");
+const getMarketCards = (scope: CommodityScope): HeaderCardConfig[] => {
+  const priceSet = scope === "local" ? commodityPriceLocal : commodityPriceGlobal;
+  const iconMap: Record<string, React.ReactNode> = {
+    jagung: <Wheat className="h-5 w-5" />,
+    ayam: <Drumstick className="h-5 w-5" />,
+    telur: <Egg className="h-5 w-5" />,
+  };
+
+  const commodityCards = priceSet.items.map((item) => ({
+    label: item.label,
+    price: formatPrice(item.price, item.currency),
+    change: item.change,
+    icon: iconMap[item.id],
+  }));
+
+  const cpin = stocks.find((item) => item.ticker === "CPIN");
+  if (!cpin) {
+    return commodityCards;
+  }
+
+  return [
+    ...commodityCards,
+    {
+      label: "CPIN",
+      price: formatPrice(cpin.price, "IDR"),
+      change: cpin.change,
+      icon: <LineChart className="h-5 w-5" />,
+    },
+  ];
+};
+
+const getSupplyCards = (scope: CommodityScope, perspective: SupplyTab): HeaderCardConfig[] => {
+  if (scope === "local") {
+    const totalSupply = regions.reduce((sum, region) => sum + region.supply.suppliesVolumeTon, 0);
+    const totalDemand = regions.reduce((sum, region) => sum + region.supply.salesVolumeTon, 0);
+    const net = totalSupply - totalDemand;
+    const averageYoy = regions.reduce((sum, region) => sum + region.supply.yoyGrowth, 0) / regions.length;
+
+    const activeCount =
+      perspective === "mitra"
+        ? regions.reduce((sum, region) => sum + region.supply.totalMitraAktif, 0)
+        : regions.reduce((sum, region) => sum + region.supply.totalPelanggan, 0);
+
+    const utilizationMitra =
+      mitraList.length === 0
+        ? 0
+        : mitraList.reduce((sum, mitra) => sum + mitra.utilizationRate, 0) / mitraList.length;
+
+    const fulfillmentPelanggan =
+      pelangganList.length === 0
+        ? 0
+        : pelangganList.reduce((sum, pelanggan) => sum + pelanggan.fulfillmentRate, 0) / pelangganList.length;
+
+    const netRatio = totalDemand === 0 ? 0 : (net / totalDemand) * 100;
+    const demandPressure = totalDemand === 0 ? 0 : ((totalDemand - totalSupply) / totalDemand) * 100;
+
+    return [
+      {
+        label: "Supply Nasional",
+        price: `${formatCompact(totalSupply)} ton`,
+        change: Number(averageYoy.toFixed(1)),
+        icon: <Package className="h-5 w-5" />,
+      },
+      {
+        label: "Demand Nasional",
+        price: `${formatCompact(totalDemand)} ton`,
+        change: Number((-demandPressure).toFixed(1)),
+        icon: <ShoppingCart className="h-5 w-5" />,
+      },
+      {
+        label: "Net Surplus/Defisit",
+        price: `${net >= 0 ? "+" : ""}${formatCompact(net)} ton`,
+        change: Number(netRatio.toFixed(1)),
+        icon: <Factory className="h-5 w-5" />,
+      },
+      {
+        label: perspective === "mitra" ? "Mitra Aktif" : "Pelanggan Aktif",
+        price: formatCompact(activeCount),
+        change: Number(
+          (perspective === "mitra" ? utilizationMitra - 80 : fulfillmentPelanggan - 94).toFixed(1),
+        ),
+        icon: <Users className="h-5 w-5" />,
+      },
+    ];
+  }
+
+  const totalCountries = countries.length;
+  const exporterCount = countries.filter((country) => country.supply.isExporter).length;
+  const importerCount = totalCountries - exporterCount;
+
+  const totalExport = countries.reduce((sum, country) => sum + country.supply.exportVolumeTon, 0);
+  const totalImport = countries.reduce((sum, country) => sum + country.supply.importVolumeTon, 0);
+  const netTrade = totalExport - totalImport;
+  const avgSupplyIndex = countries.reduce((sum, country) => sum + country.supply.supplyIndex, 0) / totalCountries;
+  const partnerCount = countries.filter((country) => country.supply.tradeRelation === "partner").length;
+
+  return [
+    {
+      label: "Avg Supply Index",
+      price: `${avgSupplyIndex.toFixed(1)}`,
+      change: Number((avgSupplyIndex - 60).toFixed(1)),
+      icon: <Package className="h-5 w-5" />,
+    },
+    {
+      label: "Exporter Countries",
+      price: formatCompact(exporterCount),
+      change: Number((((exporterCount - importerCount) / totalCountries) * 100).toFixed(1)),
+      icon: <Factory className="h-5 w-5" />,
+    },
+    {
+      label: "Net Trade Volume",
+      price: `${netTrade >= 0 ? "+" : ""}${formatCompact(netTrade)} ton`,
+      change: Number(((netTrade / Math.max(totalImport, 1)) * 100).toFixed(1)),
+      icon: <ShoppingCart className="h-5 w-5" />,
+    },
+    {
+      label: perspective === "mitra" ? "Strategic Partners" : "Demand Markets",
+      price: formatCompact(perspective === "mitra" ? partnerCount : importerCount),
+      change: Number((((partnerCount - importerCount) / totalCountries) * 100).toFixed(1)),
+      icon: <Users className="h-5 w-5" />,
+    },
+  ];
+};
+
+const DashboardHeader = ({
+  commodityScope,
+  dashboardMode,
+  supplyPerspective,
+  competitorTicker,
+  onCommodityScopeChange,
+  onDashboardModeChange,
+  onCompetitorChange,
+}: DashboardHeaderProps) => {
+  const cards =
+    dashboardMode === "market"
+      ? getMarketCards(commodityScope)
+      : getSupplyCards(commodityScope, supplyPerspective);
 
   return (
     <header className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <SelectChip
-          label="Comodity Price"
+          label="Commodity Price"
           value={commodityScope}
-          options={["Local", "Global"]}
-          onChange={setCommodityScope}
+          options={scopeOptions}
+          onChange={onCommodityScopeChange}
         />
         <SelectChip
           label="Dashboard Mode"
           value={dashboardMode}
-          options={["Market", "Supply"]}
-          onChange={setDashboardMode}
+          options={modeOptions}
+          onChange={onDashboardModeChange}
         />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {COMMODITIES.map((c) => (
-          <CommodityCard key={c.label} {...c} />
+        {cards.map((card) => (
+          <CommodityCard
+            key={card.label}
+            label={card.label}
+            price={card.price}
+            change={card.change}
+            icon={card.icon}
+          />
         ))}
-        <CompetitorStockCard />
+        <CompetitorStockCard selected={competitorTicker} onChange={onCompetitorChange} />
       </div>
     </header>
   );
