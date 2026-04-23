@@ -53,8 +53,8 @@ const Index = () => {
           onSupplyPerspectiveChange={setSupplyPerspective}
         />
 
-        {/* Floating insight cards over the map (offset left to clear the legend) */}
-        <div className="pointer-events-none absolute bottom-4 left-52 right-4 z-20 grid grid-cols-1 gap-3 md:grid-cols-3">
+        {/* Floating insight sidebar — right side, below AI Assistant button, scrollable, never overlaps legend */}
+        <div className="pointer-events-none absolute right-4 top-16 bottom-20 z-20 hidden w-80 flex-col gap-3 overflow-y-auto md:flex">
           <div className="pointer-events-auto">
             <InsightCard title="Market Insights" insight={insightMap.market} />
           </div>
