@@ -62,7 +62,7 @@ const MapPanel = () => {
 
       {/* Floating AI Assistant chat */}
       {chatOpen && (
-        <div className="pointer-events-auto absolute right-4 top-16 z-30 flex h-[420px] w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
+        <div className="pointer-events-auto absolute right-4 top-16 bottom-4 z-30 flex w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
             <div className="flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
