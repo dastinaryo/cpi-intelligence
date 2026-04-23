@@ -451,27 +451,29 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
       />
 
       <div className="pointer-events-none absolute bottom-4 left-4 z-20">
-        <div className="pointer-events-auto w-52 rounded-lg border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur">
-          <div className="mb-1 text-xs font-semibold tracking-wide text-foreground">Legend</div>
-          <div className="mb-2 text-[11px] text-muted-foreground">{metricLabel}</div>
-          <ul className="space-y-1.5">
+        <div className="pointer-events-auto rounded-lg border border-border bg-card/95 px-3 py-2 shadow-md backdrop-blur">
+          <div className="mb-1.5 flex items-baseline gap-2">
+            <span className="text-[11px] font-semibold tracking-wide text-foreground">Legend</span>
+            <span className="text-[10px] text-muted-foreground">{metricLabel}</span>
+          </div>
+          <div className="flex items-center gap-3">
             {(legend?.stops ?? []).map((item) => (
-              <li key={`${item.minValue}-${item.maxValue}`} className="flex items-center gap-2">
+              <div key={`${item.minValue}-${item.maxValue}`} className="flex items-center gap-1.5">
                 <span
-                  className="h-3 w-3 rounded-sm border border-border"
+                  className="h-2.5 w-2.5 rounded-sm border border-border"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-[11px] text-muted-foreground">{item.label}</span>
-              </li>
+                <span className="text-[10px] text-muted-foreground">{item.label}</span>
+              </div>
             ))}
-            <li className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span
-                className="h-3 w-3 rounded-sm border border-border"
+                className="h-2.5 w-2.5 rounded-sm border border-border"
                 style={{ backgroundColor: NO_DATA_COLOR }}
               />
-              <span className="text-[11px] text-muted-foreground">Tidak Ada Data</span>
-            </li>
-          </ul>
+              <span className="text-[10px] text-muted-foreground">N/A</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
