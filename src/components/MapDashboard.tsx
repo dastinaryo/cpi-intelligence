@@ -83,8 +83,8 @@ const MapDashboard = () => {
           },
         ],
       },
-      center: [10, 25],
-      zoom: 1.6,
+      center: [118, -2.5],
+      zoom: 4.2,
       attributionControl: { compact: true },
     });
     mapRef.current = map;
