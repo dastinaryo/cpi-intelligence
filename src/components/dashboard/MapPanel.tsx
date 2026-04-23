@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, Send, Sparkles, X } from "lucide-react";
+import { Bot, Send, Sparkles, Trash2, X } from "lucide-react";
 import MapDashboard from "@/components/MapDashboard";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,12 @@ const MapPanel = () => {
   const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([
     { role: "ai", text: "Hi! Saya AI Assistant. Tanyakan apa saja tentang data pada peta." },
   ]);
+
+  const initialMessages = [
+    { role: "ai" as const, text: "Hi! Saya AI Assistant. Tanyakan apa saja tentang data pada peta." },
+  ];
+
+  const clearChat = () => setMessages(initialMessages);
 
   const sendMessage = () => {
     const text = input.trim();
@@ -68,14 +74,25 @@ const MapPanel = () => {
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               <span className="text-sm font-semibold text-foreground">AI Assistant</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setChatOpen(false)}
-              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-              aria-label="Close chat"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={clearChat}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                aria-label="Clear chat"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={() => setChatOpen(false)}
+                className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                aria-label="Close chat"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 space-y-2 overflow-y-auto p-3">
