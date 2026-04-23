@@ -219,6 +219,7 @@ export interface Pelanggan {
   distanceKm: number;
   leadTimeDays: number;
   logisticsCostPerKg: number;
+  notes?: string;
 }
  
 // ─────────────────────────────────────────────

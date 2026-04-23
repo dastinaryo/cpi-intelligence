@@ -451,10 +451,10 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
       />
 
       <div className="pointer-events-none absolute bottom-4 left-4 z-20">
-        <div className="pointer-events-auto w-52 rounded-lg border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur">
-          <div className="mb-1 text-xs font-semibold tracking-wide text-foreground">Legend</div>
-          <div className="mb-2 text-[11px] text-muted-foreground">{metricLabel}</div>
-          <ul className="space-y-1.5">
+        <div className="pointer-events-auto flex h-72 w-52 flex-col rounded-xl border border-border bg-card/95 px-4 py-3 shadow-xl backdrop-blur">
+          <div className="text-xs font-semibold tracking-wide text-foreground">Legend</div>
+          <div className="mb-3 text-[11px] text-muted-foreground">{metricLabel}</div>
+          <ul className="flex-1 space-y-2 overflow-y-auto pr-1">
             {(legend?.stops ?? []).map((item) => (
               <li key={`${item.minValue}-${item.maxValue}`} className="flex items-center gap-2">
                 <span
