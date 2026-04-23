@@ -85,7 +85,7 @@ const MapDashboard = () => {
       },
       center: [118, -2.5],
       zoom: 4.2,
-      attributionControl: { compact: true },
+      attributionControl: false,
     });
     mapRef.current = map;
 
