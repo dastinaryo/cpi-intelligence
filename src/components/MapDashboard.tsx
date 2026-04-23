@@ -89,7 +89,7 @@ const MapDashboard = () => {
     });
     mapRef.current = map;
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
     map.scrollZoom.setWheelZoomRate(1 / 200); // smoother zoom
     map.dragRotate.disable();
     map.touchZoomRotate.disableRotation();
@@ -303,7 +303,7 @@ const MapDashboard = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0">
+    <div className="relative h-full w-full overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
 
       {/* Hover tooltip — follows the cursor */}
