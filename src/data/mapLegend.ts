@@ -1,13 +1,22 @@
 
 import type { LegendConfig, MapLayerItem } from "@/types/dashboard";
  
-// Blue gradient stops — consistent with existing MapDashboard color palette
+// Blue gradient (fallback / global supply)
 const BLUE_STOPS = [
   { minValue: 0,   maxValue: 20,  color: "#eaf3fb", label: "Sangat Rendah" },
   { minValue: 20,  maxValue: 40,  color: "#c6dcef", label: "Rendah" },
   { minValue: 40,  maxValue: 60,  color: "#94c0df", label: "Sedang" },
   { minValue: 60,  maxValue: 80,  color: "#5fa1cb", label: "Tinggi" },
   { minValue: 80,  maxValue: 100, color: "#08519c", label: "Sangat Tinggi" },
+];
+
+// Market mode — diverging palette (cool → warm) to highlight market heat
+const MARKET_STOPS = [
+  { minValue: 0,   maxValue: 20,  color: "#2c7bb6", label: "Pasar Lemah" },
+  { minValue: 20,  maxValue: 40,  color: "#abd9e9", label: "Pasar Lesu" },
+  { minValue: 40,  maxValue: 60,  color: "#ffffbf", label: "Pasar Stabil" },
+  { minValue: 60,  maxValue: 80,  color: "#fdae61", label: "Pasar Aktif" },
+  { minValue: 80,  maxValue: 100, color: "#d7191c", label: "Pasar Panas" },
 ];
  
 // Red-to-green for surplus/shortage (supply mode)
@@ -26,7 +35,7 @@ export const legendConfigs: LegendConfig[] = [
     metricLabel: "Indeks Pasar Lokal",
     unit: "0–100",
     description: "Komposit dari harga komoditas lokal, inflasi, volatilitas harga, dan tren permintaan per provinsi.",
-    stops: BLUE_STOPS,
+    stops: MARKET_STOPS,
   },
   {
     mode: "market",
@@ -34,7 +43,7 @@ export const legendConfigs: LegendConfig[] = [
     metricLabel: "Indeks Pasar Global",
     unit: "0–100",
     description: "Komposit dari indeks harga jagung, tingkat inflasi, risiko pasar, dan neraca perdagangan per negara.",
-    stops: BLUE_STOPS,
+    stops: MARKET_STOPS,
   },
   {
     mode: "supply",
