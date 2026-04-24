@@ -90,6 +90,8 @@ export interface DistrictMarketData {
   districtId: string;
   districtName: string;   // matches GeoJSON NAME_2
   provinceId: string;     // FK → RegionData.regionId
+  provinceName?: string;
+  districtType?: string;
   market: RegionMarketData;
 }
 

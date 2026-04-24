@@ -158,8 +158,11 @@ const MapPanel = ({
       .filter((signal) => signal.scope === "both" || signal.scope === selection.scope)
       .filter((signal) => {
         if (selection.scope === "local") {
+          const localIds = [selection.id, selection.region?.regionId].filter(
+            (value): value is string => Boolean(value),
+          );
           return (
-            signal.affectedRegions.includes(selection.id) ||
+            localIds.some((id) => signal.affectedRegions.includes(id)) ||
             signal.affectedRegions.length === 0
           );
         }
@@ -215,6 +218,11 @@ const MapPanel = ({
                 <p className="text-xs text-muted-foreground">
                   {selection.metricLabel}: {selection.metricValue.toFixed(1)}
                 </p>
+                {selection.district?.provinceName && (
+                  <p className="text-xs text-muted-foreground">
+                    {selection.district.provinceName}
+                  </p>
+                )}
               </div>
               <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground">
                 {dashboardMode === "market" ? "Market" : `Supply • ${supplyPerspective === "mitra" ? "Mitra" : "Pelanggan"}`}
@@ -226,12 +234,22 @@ const MapPanel = ({
               <div className="space-y-1.5 text-xs text-foreground/90">
                 {selection.region ? (
                   <>
-                    <p>Harga Jagung: {formatIdr(selection.region.market.avgCornPrice)} /kg</p>
-                    <p>Harga Ayam: {formatIdr(selection.region.market.avgChickenPrice)} /kg</p>
-                    <p>Harga Telur: {formatIdr(selection.region.market.avgEggPrice)} /kg</p>
-                    <p>Inflasi: {selection.region.market.inflationRate.toFixed(1)}%</p>
-                    <p>Risk Signal: {selection.region.market.riskSignal.toUpperCase()}</p>
-                    <p>Trend: {selection.region.market.demandTrend}</p>
+                    <p>
+                      Harga Jagung: {formatIdr((selection.district?.market ?? selection.region.market).avgCornPrice)} /kg
+                    </p>
+                    <p>
+                      Harga Ayam: {formatIdr((selection.district?.market ?? selection.region.market).avgChickenPrice)} /kg
+                    </p>
+                    <p>
+                      Harga Telur: {formatIdr((selection.district?.market ?? selection.region.market).avgEggPrice)} /kg
+                    </p>
+                    <p>
+                      Inflasi: {(selection.district?.market ?? selection.region.market).inflationRate.toFixed(1)}%
+                    </p>
+                    <p>
+                      Risk Signal: {(selection.district?.market ?? selection.region.market).riskSignal.toUpperCase()}
+                    </p>
+                    <p>Trend: {(selection.district?.market ?? selection.region.market).demandTrend}</p>
                   </>
                 ) : selection.country ? (
                   <>
