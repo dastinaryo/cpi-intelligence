@@ -343,4 +343,228 @@ export const countries: CountryData[] = [
     market: { cornPriceIndex: 84, inflationRate: 20.0, commodityImportUSD: 1600, marketRisk: "high", marketIndex: 85, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "declining", riskSignal: "red", externalFactors: ["inflasi 20% rontokkan daya beli", "eksportir kakao namun defisit pangan pokok", "cedi terdepresiasi 40% dalam setahun"] },
     supply: { supplyIndex: 52, isExporter: false, exportVolumeTon: 900000, importVolumeTon: 1900000, tradeRelation: "none", keyExportCommodities: ["kakao"] },
   },
+
+  // ─── ASEAN TAMBAHAN ──────────────────────────────────────
+  {
+    countryCode: "LAO",
+    countryName: "Laos",
+    region: "Asia Tenggara",
+    market: { cornPriceIndex: 69, inflationRate: 24.0, commodityImportUSD: 280, marketRisk: "high", marketIndex: 70, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "declining", riskSignal: "red", externalFactors: ["inflasi 24% gerus daya beli masyarakat", "kip melemah tajam terhadap dolar", "ketergantungan tinggi pada impor pangan Thailand"] },
+    supply: { supplyIndex: 48, isExporter: false, exportVolumeTon: 320000, importVolumeTon: 580000, tradeRelation: "none", keyExportCommodities: ["jagung", "kopi"] },
+  },
+  {
+    countryCode: "BRN",
+    countryName: "Brunei",
+    region: "Asia Tenggara",
+    market: { cornPriceIndex: 48, inflationRate: 0.4, commodityImportUSD: 420, marketRisk: "low", marketIndex: 50, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["pendapatan minyak subsidi harga pangan", "100% ketergantungan impor pangan pokok"] },
+    supply: { supplyIndex: 12, isExporter: false, exportVolumeTon: 0, importVolumeTon: 420000, tradeRelation: "partner", keyExportCommodities: [] },
+  },
+  {
+    countryCode: "TLS",
+    countryName: "Timor-Leste",
+    region: "Asia Tenggara",
+    market: { cornPriceIndex: 77, inflationRate: 8.2, commodityImportUSD: 95, marketRisk: "high", marketIndex: 75, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "growing", riskSignal: "red", externalFactors: ["ketahanan pangan sangat rentan", "infrastruktur distribusi terbatas", "ketergantungan penuh pada impor beras & jagung"] },
+    supply: { supplyIndex: 30, isExporter: false, exportVolumeTon: 18000, importVolumeTon: 210000, tradeRelation: "none", keyExportCommodities: ["kopi"] },
+  },
+
+  // ─── ASIA TAMBAHAN ───────────────────────────────────────
+  {
+    countryCode: "TWN",
+    countryName: "Taiwan",
+    region: "Asia Timur",
+    market: { cornPriceIndex: 60, inflationRate: 2.5, commodityImportUSD: 6800, marketRisk: "low", marketIndex: 62, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["industri pakan ternak modern butuh impor besar", "ketegangan Selat Taiwan ancam rantai pasok"] },
+    supply: { supplyIndex: 30, isExporter: false, exportVolumeTon: 0, importVolumeTon: 7200000, tradeRelation: "partner", keyExportCommodities: [] },
+  },
+  {
+    countryCode: "LKA",
+    countryName: "Sri Lanka",
+    region: "Asia Selatan",
+    market: { cornPriceIndex: 83, inflationRate: 16.0, commodityImportUSD: 1400, marketRisk: "high", marketIndex: 84, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "declining", riskSignal: "red", externalFactors: ["pasca krisis ekonomi 2022", "cadangan devisa kritis limitasi impor pangan", "pertanian mulai pulih namun lambat"] },
+    supply: { supplyIndex: 40, isExporter: false, exportVolumeTon: 320000, importVolumeTon: 1600000, tradeRelation: "none", keyExportCommodities: ["teh", "rempah"] },
+  },
+  {
+    countryCode: "NPL",
+    countryName: "Nepal",
+    region: "Asia Selatan",
+    market: { cornPriceIndex: 74, inflationRate: 7.1, commodityImportUSD: 620, marketRisk: "medium", marketIndex: 72, tradeBalance: "deficit", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["ketergantungan impor pangan dari India sangat tinggi", "bencana alam (gempa, banjir) ancam ketahanan pangan"] },
+    supply: { supplyIndex: 42, isExporter: false, exportVolumeTon: 85000, importVolumeTon: 980000, tradeRelation: "none", keyExportCommodities: ["teh", "rempah lokal"] },
+  },
+  {
+    countryCode: "MNG",
+    countryName: "Mongolia",
+    region: "Asia Timur",
+    market: { cornPriceIndex: 72, inflationRate: 10.5, commodityImportUSD: 380, marketRisk: "medium", marketIndex: 70, tradeBalance: "deficit", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["cuaca ekstrem dzud (badai salju) ancam peternakan", "ketergantungan daging & susu dari ternak lokal", "impor biji-bijian dari Rusia & China dominan"] },
+    supply: { supplyIndex: 45, isExporter: false, exportVolumeTon: 55000, importVolumeTon: 620000, tradeRelation: "none", keyExportCommodities: ["daging", "kasmir"] },
+  },
+
+  // ─── TIMUR TENGAH TAMBAHAN ───────────────────────────────
+  {
+    countryCode: "QAT",
+    countryName: "Qatar",
+    region: "Timur Tengah",
+    market: { cornPriceIndex: 46, inflationRate: 1.2, commodityImportUSD: 2800, marketRisk: "low", marketIndex: 48, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "growing", riskSignal: "green", externalFactors: ["pendapatan gas alam subsidiasi impor pangan", "100% impor bahan pangan pokok", "investasi ketahanan pangan pasca blokade 2017"] },
+    supply: { supplyIndex: 10, isExporter: false, exportVolumeTon: 0, importVolumeTon: 2800000, tradeRelation: "partner", keyExportCommodities: [] },
+  },
+  {
+    countryCode: "KWT",
+    countryName: "Kuwait",
+    region: "Timur Tengah",
+    market: { cornPriceIndex: 48, inflationRate: 3.2, commodityImportUSD: 3100, marketRisk: "low", marketIndex: 50, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["subsidi pangan pemerintah sangat besar", "impor 90% kebutuhan pangan dari luar negeri"] },
+    supply: { supplyIndex: 8, isExporter: false, exportVolumeTon: 0, importVolumeTon: 3100000, tradeRelation: "partner", keyExportCommodities: [] },
+  },
+  {
+    countryCode: "JOR",
+    countryName: "Yordania",
+    region: "Timur Tengah",
+    market: { cornPriceIndex: 74, inflationRate: 3.8, commodityImportUSD: 2200, marketRisk: "medium", marketIndex: 72, tradeBalance: "deficit", priceVolatility: "medium", demandTrend: "growing", riskSignal: "yellow", externalFactors: ["krisis air ancam produksi pertanian lokal", "tekanan dari influx pengungsi Suriah & Palestina", "importir gandum terbesar per kapita di kawasan"] },
+    supply: { supplyIndex: 22, isExporter: false, exportVolumeTon: 180000, importVolumeTon: 2400000, tradeRelation: "none", keyExportCommodities: ["fosfat", "sayuran"] },
+  },
+  {
+    countryCode: "OMN",
+    countryName: "Oman",
+    region: "Timur Tengah",
+    market: { cornPriceIndex: 52, inflationRate: 1.5, commodityImportUSD: 2400, marketRisk: "low", marketIndex: 54, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["diversifikasi ekonomi kurangi ketergantungan minyak", "impor 80% pangan dari India dan Pakistan"] },
+    supply: { supplyIndex: 15, isExporter: false, exportVolumeTon: 0, importVolumeTon: 2500000, tradeRelation: "partner", keyExportCommodities: [] },
+  },
+
+  // ─── EROPA TAMBAHAN ──────────────────────────────────────
+  {
+    countryCode: "ROU",
+    countryName: "Rumania",
+    region: "Eropa Timur",
+    market: { cornPriceIndex: 65, inflationRate: 5.8, commodityImportUSD: 3200, marketRisk: "medium", marketIndex: 66, tradeBalance: "surplus", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["lumbung jagung Eropa ke-3 terbesar", "inflasi pangan tertinggi di EU", "ekspor jagung ke Timur Tengah meningkat"] },
+    supply: { supplyIndex: 72, isExporter: true, exportVolumeTon: 9200000, importVolumeTon: 2800000, tradeRelation: "partner", keyExportCommodities: ["jagung", "gandum", "bunga matahari"] },
+  },
+  {
+    countryCode: "HUN",
+    countryName: "Hungaria",
+    region: "Eropa Timur",
+    market: { cornPriceIndex: 64, inflationRate: 4.2, commodityImportUSD: 2600, marketRisk: "medium", marketIndex: 65, tradeBalance: "surplus", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["produsen jagung & gandum penting di Eropa Tengah", "kebijakan agrikultur mandiri dari EU sebagian"] },
+    supply: { supplyIndex: 70, isExporter: true, exportVolumeTon: 7400000, importVolumeTon: 2200000, tradeRelation: "none", keyExportCommodities: ["jagung", "gandum", "biji bunga matahari"] },
+  },
+  {
+    countryCode: "SWE",
+    countryName: "Swedia",
+    region: "Eropa Barat",
+    market: { cornPriceIndex: 54, inflationRate: 2.1, commodityImportUSD: 5800, marketRisk: "low", marketIndex: 56, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["industri pangan berkelanjutan & organik kuat", "impor jagung pakan ternak dari Eropa Timur"] },
+    supply: { supplyIndex: 55, isExporter: false, exportVolumeTon: 2100000, importVolumeTon: 4800000, tradeRelation: "none", keyExportCommodities: ["barley", "oat"] },
+  },
+  {
+    countryCode: "NOR",
+    countryName: "Norwegia",
+    region: "Eropa Barat",
+    market: { cornPriceIndex: 52, inflationRate: 3.3, commodityImportUSD: 3900, marketRisk: "low", marketIndex: 54, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["eksportir salmon terbesar dunia", "impor biji-bijian pakan ternak sangat tinggi"] },
+    supply: { supplyIndex: 45, isExporter: false, exportVolumeTon: 1200000, importVolumeTon: 4200000, tradeRelation: "none", keyExportCommodities: ["salmon", "ikan laut"] },
+  },
+  {
+    countryCode: "PRT",
+    countryName: "Portugal",
+    region: "Eropa Barat",
+    market: { cornPriceIndex: 62, inflationRate: 2.6, commodityImportUSD: 4200, marketRisk: "low", marketIndex: 64, tradeBalance: "deficit", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["kekeringan berulang tekan produksi pertanian", "eksportir minyak zaitun & anggur premium"] },
+    supply: { supplyIndex: 58, isExporter: false, exportVolumeTon: 2800000, importVolumeTon: 4600000, tradeRelation: "none", keyExportCommodities: ["minyak zaitun", "anggur", "ikan"] },
+  },
+  {
+    countryCode: "GRC",
+    countryName: "Yunani",
+    region: "Eropa Barat",
+    market: { cornPriceIndex: 65, inflationRate: 2.9, commodityImportUSD: 5100, marketRisk: "medium", marketIndex: 64, tradeBalance: "deficit", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["produsen minyak zaitun & perikanan penting", "impor jagung pakan ternak dari Bulgaria & Rumania"] },
+    supply: { supplyIndex: 60, isExporter: false, exportVolumeTon: 3200000, importVolumeTon: 5600000, tradeRelation: "none", keyExportCommodities: ["minyak zaitun", "buah-buahan", "ikan"] },
+  },
+  {
+    countryCode: "BLR",
+    countryName: "Belarus",
+    region: "Eropa Timur",
+    market: { cornPriceIndex: 70, inflationRate: 6.5, commodityImportUSD: 1800, marketRisk: "high", marketIndex: 71, tradeBalance: "surplus", priceVolatility: "high", demandTrend: "stable", riskSignal: "red", externalFactors: ["sanksi barat batasi akses pasar ekspor", "ketergantungan ekonomi pada Rusia sangat tinggi", "produksi kentang & produk susu besar"] },
+    supply: { supplyIndex: 68, isExporter: true, exportVolumeTon: 5200000, importVolumeTon: 2400000, tradeRelation: "none", keyExportCommodities: ["kentang", "produk susu", "gula bit"] },
+  },
+
+  // ─── AMERIKA LATIN TAMBAHAN ──────────────────────────────
+  {
+    countryCode: "VEN",
+    countryName: "Venezuela",
+    region: "Amerika Latin",
+    market: { cornPriceIndex: 95, inflationRate: 190.0, commodityImportUSD: 1200, marketRisk: "high", marketIndex: 96, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "declining", riskSignal: "red", externalFactors: ["hiperinflasi 190% hancurkan sistem distribusi pangan", "krisis ekonomi akibat sanksi & mismanajemen", "migrasi besar-besaran kurangi tenaga kerja pertanian"] },
+    supply: { supplyIndex: 20, isExporter: false, exportVolumeTon: 80000, importVolumeTon: 2400000, tradeRelation: "none", keyExportCommodities: [] },
+  },
+  {
+    countryCode: "BOL",
+    countryName: "Bolivia",
+    region: "Amerika Latin",
+    market: { cornPriceIndex: 71, inflationRate: 4.8, commodityImportUSD: 820, marketRisk: "medium", marketIndex: 70, tradeBalance: "neutral", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["produsen quinoa & kedelai berkembang", "keterbatasan infrastruktur hambat ekspor"] },
+    supply: { supplyIndex: 58, isExporter: true, exportVolumeTon: 2200000, importVolumeTon: 1800000, tradeRelation: "none", keyExportCommodities: ["kedelai", "quinoa", "jagung"] },
+  },
+  {
+    countryCode: "ECU",
+    countryName: "Ekuador",
+    region: "Amerika Latin",
+    market: { cornPriceIndex: 70, inflationRate: 3.6, commodityImportUSD: 1600, marketRisk: "medium", marketIndex: 69, tradeBalance: "neutral", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["eksportir pisang & udang terbesar dunia", "dolarisasi ekonomi stabilkan harga pangan"] },
+    supply: { supplyIndex: 62, isExporter: true, exportVolumeTon: 3400000, importVolumeTon: 2800000, tradeRelation: "none", keyExportCommodities: ["pisang", "udang", "kakao"] },
+  },
+  {
+    countryCode: "PRY",
+    countryName: "Paraguay",
+    region: "Amerika Latin",
+    market: { cornPriceIndex: 73, inflationRate: 4.5, commodityImportUSD: 480, marketRisk: "medium", marketIndex: 71, tradeBalance: "surplus", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["eksportir kedelai & jagung besar per kapita", "cuaca kering ancam hasil panen sering"] },
+    supply: { supplyIndex: 78, isExporter: true, exportVolumeTon: 8600000, importVolumeTon: 1200000, tradeRelation: "partner", keyExportCommodities: ["kedelai", "jagung", "daging sapi"] },
+  },
+  {
+    countryCode: "URY",
+    countryName: "Uruguay",
+    region: "Amerika Latin",
+    market: { cornPriceIndex: 66, inflationRate: 5.5, commodityImportUSD: 620, marketRisk: "medium", marketIndex: 65, tradeBalance: "surplus", priceVolatility: "medium", demandTrend: "stable", riskSignal: "yellow", externalFactors: ["eksportir daging sapi & kedelai premium", "inflasi 5.5% terkendali dibanding tetangga"] },
+    supply: { supplyIndex: 82, isExporter: true, exportVolumeTon: 4800000, importVolumeTon: 900000, tradeRelation: "none", keyExportCommodities: ["daging sapi", "kedelai", "beras"] },
+  },
+
+  // ─── AFRIKA TAMBAHAN ─────────────────────────────────────
+  {
+    countryCode: "MAR",
+    countryName: "Maroko",
+    region: "Afrika Utara",
+    market: { cornPriceIndex: 73, inflationRate: 6.2, commodityImportUSD: 3800, marketRisk: "medium", marketIndex: 72, tradeBalance: "deficit", priceVolatility: "medium", demandTrend: "growing", riskSignal: "yellow", externalFactors: ["kekeringan berulang tekan produksi gandum lokal", "ekspor fosfat mendanai impor pangan", "reformasi pertanian dorong produktivitas"] },
+    supply: { supplyIndex: 48, isExporter: false, exportVolumeTon: 1200000, importVolumeTon: 4200000, tradeRelation: "none", keyExportCommodities: ["fosfat", "sitrus", "tomat"] },
+  },
+  {
+    countryCode: "DZA",
+    countryName: "Aljazair",
+    region: "Afrika Utara",
+    market: { cornPriceIndex: 75, inflationRate: 9.5, commodityImportUSD: 5200, marketRisk: "medium", marketIndex: 76, tradeBalance: "deficit", priceVolatility: "medium", demandTrend: "growing", riskSignal: "yellow", externalFactors: ["subsidi pangan pemerintah sangat besar dari pendapatan migas", "importir gandum terbesar Afrika", "keterbatasan lahan subur hambat swasembada"] },
+    supply: { supplyIndex: 35, isExporter: false, exportVolumeTon: 420000, importVolumeTon: 6200000, tradeRelation: "none", keyExportCommodities: ["kurma"] },
+  },
+  {
+    countryCode: "MOZ",
+    countryName: "Mozambik",
+    region: "Afrika",
+    market: { cornPriceIndex: 80, inflationRate: 7.2, commodityImportUSD: 780, marketRisk: "high", marketIndex: 78, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "growing", riskSignal: "red", externalFactors: ["bencana siklon berulang hancurkan infrastruktur pangan", "salah satu negara termiskin dunia", "ketahanan pangan sangat rentan"] },
+    supply: { supplyIndex: 38, isExporter: false, exportVolumeTon: 480000, importVolumeTon: 1200000, tradeRelation: "none", keyExportCommodities: ["tembakau", "kacang mede", "gula"] },
+  },
+  {
+    countryCode: "ZWE",
+    countryName: "Zimbabwe",
+    region: "Afrika",
+    market: { cornPriceIndex: 89, inflationRate: 55.0, commodityImportUSD: 960, marketRisk: "high", marketIndex: 90, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "declining", riskSignal: "red", externalFactors: ["inflasi 55% kembali mengancam pasca krisis mata uang", "reforma agraria ganggu produktivitas pertanian", "kekeringan El Niño berulang hancurkan panen jagung"] },
+    supply: { supplyIndex: 32, isExporter: false, exportVolumeTon: 320000, importVolumeTon: 1400000, tradeRelation: "none", keyExportCommodities: ["tembakau", "emas"] },
+  },
+  {
+    countryCode: "CIV",
+    countryName: "Pantai Gading",
+    region: "Afrika",
+    market: { cornPriceIndex: 76, inflationRate: 5.4, commodityImportUSD: 1200, marketRisk: "medium", marketIndex: 74, tradeBalance: "neutral", priceVolatility: "medium", demandTrend: "growing", riskSignal: "yellow", externalFactors: ["eksportir kakao terbesar dunia (40% supply global)", "defisit pangan pokok meski surplus komoditas ekspor"] },
+    supply: { supplyIndex: 55, isExporter: true, exportVolumeTon: 2400000, importVolumeTon: 1800000, tradeRelation: "none", keyExportCommodities: ["kakao", "kopi", "karet"] },
+  },
+  {
+    countryCode: "CMR",
+    countryName: "Kamerun",
+    region: "Afrika",
+    market: { cornPriceIndex: 78, inflationRate: 7.3, commodityImportUSD: 960, marketRisk: "high", marketIndex: 77, tradeBalance: "deficit", priceVolatility: "high", demandTrend: "growing", riskSignal: "red", externalFactors: ["konflik di wilayah Barat Laut hambat produksi pertanian", "ketidakstabilan keamanan ganggu rantai distribusi"] },
+    supply: { supplyIndex: 44, isExporter: false, exportVolumeTon: 680000, importVolumeTon: 1400000, tradeRelation: "none", keyExportCommodities: ["kakao", "kopi", "pisang"] },
+  },
+
+  // ─── OSEANIA TAMBAHAN ────────────────────────────────────
+  {
+    countryCode: "NZL",
+    countryName: "Selandia Baru",
+    region: "Oseania",
+    market: { cornPriceIndex: 56, inflationRate: 3.3, commodityImportUSD: 1200, marketRisk: "low", marketIndex: 58, tradeBalance: "surplus", priceVolatility: "low", demandTrend: "stable", riskSignal: "green", externalFactors: ["eksportir produk susu & daging domba premium", "iklim pertanian kondusif sepanjang tahun"] },
+    supply: { supplyIndex: 82, isExporter: true, exportVolumeTon: 8200000, importVolumeTon: 1400000, tradeRelation: "partner", keyExportCommodities: ["produk susu", "daging domba", "daging sapi"] },
+  },
 ];
