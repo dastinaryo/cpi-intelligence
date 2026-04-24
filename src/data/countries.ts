@@ -1,7 +1,7 @@
 import type { CountryData } from "@/types/dashboard";
  
 // ~50 key countries: ASEAN, major commodity exporters/importers, CPI trade partners
-export const countries: CountryData[] = [
+const baseCountries: CountryData[] = [
   // ─── ASEAN ──────────────────────────────────────────────
   {
     countryCode: "IDN",
@@ -568,3 +568,245 @@ export const countries: CountryData[] = [
     supply: { supplyIndex: 82, isExporter: true, exportVolumeTon: 8200000, importVolumeTon: 1400000, tradeRelation: "partner", keyExportCommodities: ["produk susu", "daging domba", "daging sapi"] },
   },
 ];
+
+type CountrySeed = {
+  countryCode: string;
+  countryName: string;
+  region: string;
+};
+
+const EXTRA_COUNTRY_SEEDS: CountrySeed[] = [
+  { countryCode: "AFG", countryName: "Afghanistan", region: "Asia Selatan" },
+  { countryCode: "ALB", countryName: "Albania", region: "Eropa Selatan" },
+  { countryCode: "AND", countryName: "Andorra", region: "Eropa Barat" },
+  { countryCode: "AGO", countryName: "Angola", region: "Afrika" },
+  { countryCode: "ATG", countryName: "Antigua dan Barbuda", region: "Karibia" },
+  { countryCode: "ARM", countryName: "Armenia", region: "Asia Barat" },
+  { countryCode: "AUT", countryName: "Austria", region: "Eropa Barat" },
+  { countryCode: "AZE", countryName: "Azerbaijan", region: "Asia Barat" },
+  { countryCode: "BHS", countryName: "Bahama", region: "Karibia" },
+  { countryCode: "BHR", countryName: "Bahrain", region: "Timur Tengah" },
+  { countryCode: "BRB", countryName: "Barbados", region: "Karibia" },
+  { countryCode: "BEL", countryName: "Belgia", region: "Eropa Barat" },
+  { countryCode: "BLZ", countryName: "Belize", region: "Amerika Tengah" },
+  { countryCode: "BEN", countryName: "Benin", region: "Afrika" },
+  { countryCode: "BTN", countryName: "Bhutan", region: "Asia Selatan" },
+  { countryCode: "BIH", countryName: "Bosnia dan Herzegovina", region: "Eropa Selatan" },
+  { countryCode: "BWA", countryName: "Botswana", region: "Afrika" },
+  { countryCode: "BGR", countryName: "Bulgaria", region: "Eropa Timur" },
+  { countryCode: "BFA", countryName: "Burkina Faso", region: "Afrika" },
+  { countryCode: "BDI", countryName: "Burundi", region: "Afrika" },
+  { countryCode: "CPV", countryName: "Tanjung Verde", region: "Afrika" },
+  { countryCode: "CAF", countryName: "Republik Afrika Tengah", region: "Afrika" },
+  { countryCode: "TCD", countryName: "Chad", region: "Afrika" },
+  { countryCode: "COM", countryName: "Komoro", region: "Afrika" },
+  { countryCode: "COG", countryName: "Republik Kongo", region: "Afrika" },
+  { countryCode: "CRI", countryName: "Kosta Rika", region: "Amerika Tengah" },
+  { countryCode: "HRV", countryName: "Kroasia", region: "Eropa Selatan" },
+  { countryCode: "CUB", countryName: "Kuba", region: "Karibia" },
+  { countryCode: "CYP", countryName: "Siprus", region: "Eropa Selatan" },
+  { countryCode: "CZE", countryName: "Ceko", region: "Eropa Tengah" },
+  { countryCode: "DNK", countryName: "Denmark", region: "Eropa Utara" },
+  { countryCode: "DJI", countryName: "Djibouti", region: "Afrika" },
+  { countryCode: "DMA", countryName: "Dominika", region: "Karibia" },
+  { countryCode: "DOM", countryName: "Republik Dominika", region: "Karibia" },
+  { countryCode: "SLV", countryName: "El Salvador", region: "Amerika Tengah" },
+  { countryCode: "GNQ", countryName: "Guinea Ekuatorial", region: "Afrika" },
+  { countryCode: "ERI", countryName: "Eritrea", region: "Afrika" },
+  { countryCode: "EST", countryName: "Estonia", region: "Eropa Utara" },
+  { countryCode: "SWZ", countryName: "Eswatini", region: "Afrika" },
+  { countryCode: "FIN", countryName: "Finlandia", region: "Eropa Utara" },
+  { countryCode: "GAB", countryName: "Gabon", region: "Afrika" },
+  { countryCode: "GMB", countryName: "Gambia", region: "Afrika" },
+  { countryCode: "GEO", countryName: "Georgia", region: "Eropa Timur" },
+  { countryCode: "GIN", countryName: "Guinea", region: "Afrika" },
+  { countryCode: "GNB", countryName: "Guinea-Bissau", region: "Afrika" },
+  { countryCode: "GUY", countryName: "Guyana", region: "Amerika Selatan" },
+  { countryCode: "HTI", countryName: "Haiti", region: "Karibia" },
+  { countryCode: "ISL", countryName: "Islandia", region: "Eropa Utara" },
+  { countryCode: "IRL", countryName: "Irlandia", region: "Eropa Barat" },
+  { countryCode: "ISR", countryName: "Israel", region: "Timur Tengah" },
+  { countryCode: "JAM", countryName: "Jamaika", region: "Karibia" },
+  { countryCode: "KIR", countryName: "Kiribati", region: "Oseania" },
+  { countryCode: "KGZ", countryName: "Kirgizstan", region: "Asia Tengah" },
+  { countryCode: "LVA", countryName: "Latvia", region: "Eropa Utara" },
+  { countryCode: "LBN", countryName: "Lebanon", region: "Timur Tengah" },
+  { countryCode: "LSO", countryName: "Lesotho", region: "Afrika" },
+  { countryCode: "LBR", countryName: "Liberia", region: "Afrika" },
+  { countryCode: "LBY", countryName: "Libya", region: "Afrika Utara" },
+  { countryCode: "LIE", countryName: "Liechtenstein", region: "Eropa Barat" },
+  { countryCode: "LTU", countryName: "Lituania", region: "Eropa Utara" },
+  { countryCode: "LUX", countryName: "Luksemburg", region: "Eropa Barat" },
+  { countryCode: "MDG", countryName: "Madagaskar", region: "Afrika" },
+  { countryCode: "MWI", countryName: "Malawi", region: "Afrika" },
+  { countryCode: "MDV", countryName: "Maladewa", region: "Asia Selatan" },
+  { countryCode: "MLI", countryName: "Mali", region: "Afrika" },
+  { countryCode: "MLT", countryName: "Malta", region: "Eropa Selatan" },
+  { countryCode: "MRT", countryName: "Mauritania", region: "Afrika" },
+  { countryCode: "MUS", countryName: "Mauritius", region: "Afrika" },
+  { countryCode: "FSM", countryName: "Mikronesia", region: "Oseania" },
+  { countryCode: "MDA", countryName: "Moldova", region: "Eropa Timur" },
+  { countryCode: "MCO", countryName: "Monako", region: "Eropa Barat" },
+  { countryCode: "MNE", countryName: "Montenegro", region: "Eropa Selatan" },
+  { countryCode: "NAM", countryName: "Namibia", region: "Afrika" },
+  { countryCode: "NRU", countryName: "Nauru", region: "Oseania" },
+  { countryCode: "MKD", countryName: "Makedonia Utara", region: "Eropa Selatan" },
+  { countryCode: "PNG", countryName: "Papua Nugini", region: "Oseania" },
+  { countryCode: "PRK", countryName: "Korea Utara", region: "Asia Timur" },
+  { countryCode: "PAN", countryName: "Panama", region: "Amerika Tengah" },
+  { countryCode: "SYC", countryName: "Seychelles", region: "Afrika" },
+  { countryCode: "SLE", countryName: "Sierra Leone", region: "Afrika" },
+  { countryCode: "SVK", countryName: "Slovakia", region: "Eropa Tengah" },
+  { countryCode: "SVN", countryName: "Slovenia", region: "Eropa Selatan" },
+  { countryCode: "SOM", countryName: "Somalia", region: "Afrika" },
+  { countryCode: "SSD", countryName: "Sudan Selatan", region: "Afrika" },
+  { countryCode: "SDN", countryName: "Sudan", region: "Afrika" },
+  { countryCode: "SUR", countryName: "Suriname", region: "Amerika Selatan" },
+  { countryCode: "CHE", countryName: "Swiss", region: "Eropa Barat" },
+  { countryCode: "SYR", countryName: "Suriah", region: "Timur Tengah" },
+  { countryCode: "TJK", countryName: "Tajikistan", region: "Asia Tengah" },
+  { countryCode: "TGO", countryName: "Togo", region: "Afrika" },
+  { countryCode: "TON", countryName: "Tonga", region: "Oseania" },
+  { countryCode: "TTO", countryName: "Trinidad dan Tobago", region: "Karibia" },
+  { countryCode: "TUN", countryName: "Tunisia", region: "Afrika Utara" },
+  { countryCode: "TKM", countryName: "Turkmenistan", region: "Asia Tengah" },
+  { countryCode: "TUV", countryName: "Tuvalu", region: "Oseania" },
+  { countryCode: "UGA", countryName: "Uganda", region: "Afrika" },
+  { countryCode: "VUT", countryName: "Vanuatu", region: "Oseania" },
+  { countryCode: "YEM", countryName: "Yaman", region: "Timur Tengah" },
+  { countryCode: "ZMB", countryName: "Zambia", region: "Afrika" },
+  { countryCode: "RWA", countryName: "Rwanda", region: "Afrika" },
+];
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+const hashCode = (value: string) => {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+};
+
+const indexBands: Array<[number, number]> = [
+  [8, 15],
+  [16, 30],
+  [31, 45],
+  [46, 60],
+  [61, 75],
+  [76, 94],
+];
+
+const commodityPool = [
+  "jagung",
+  "gandum",
+  "beras",
+  "kedelai",
+  "barley",
+  "gula",
+  "daging sapi",
+  "ayam beku",
+  "kopi",
+  "kakao",
+];
+
+const deriveRiskLevel = (indexValue: number, inflationRate: number): "low" | "medium" | "high" => {
+  if (indexValue >= 78 || inflationRate >= 8) return "high";
+  if (indexValue >= 50 || inflationRate >= 4) return "medium";
+  return "low";
+};
+
+const deriveRiskSignal = (indexValue: number, inflationRate: number): "green" | "yellow" | "red" => {
+  if (indexValue >= 75 || inflationRate >= 8) return "red";
+  if (indexValue >= 45 || inflationRate >= 4) return "yellow";
+  return "green";
+};
+
+const deriveDemandTrend = (indexValue: number): "growing" | "stable" | "declining" => {
+  if (indexValue >= 68) return "growing";
+  if (indexValue <= 35) return "declining";
+  return "stable";
+};
+
+const rebalanceCountry = (country: CountryData): CountryData => {
+  const seed = hashCode(country.countryCode);
+  const [minBand, maxBand] = indexBands[seed % indexBands.length];
+  const targetIndex = minBand + ((seed >> 4) % (maxBand - minBand + 1));
+  const marketIndex = Math.round(targetIndex * 0.65 + country.market.marketIndex * 0.35);
+  const inflationRate = Number((1.2 + ((seed >> 2) % 130) / 10).toFixed(1));
+  const priceVolatility = deriveRiskLevel(marketIndex, inflationRate);
+  const riskSignal = deriveRiskSignal(marketIndex, inflationRate);
+  const demandTrend = deriveDemandTrend(marketIndex);
+  const supplyIndex = clamp(
+    Math.round((country.supply.supplyIndex * 0.45) + ((seed >> 3) % 86) * 0.55),
+    8,
+    96,
+  );
+
+  return {
+    ...country,
+    market: {
+      ...country.market,
+      marketIndex,
+      cornPriceIndex: clamp(Math.round(marketIndex + (((seed >> 5) % 17) - 8)), 8, 98),
+      inflationRate,
+      marketRisk: deriveRiskLevel(marketIndex, inflationRate),
+      priceVolatility,
+      demandTrend,
+      riskSignal,
+    },
+    supply: {
+      ...country.supply,
+      supplyIndex,
+    },
+  };
+};
+
+const generatedCountries: CountryData[] = EXTRA_COUNTRY_SEEDS.map((seed, index) => {
+  const hash = hashCode(`${seed.countryCode}:${seed.countryName}`);
+  const [minBand, maxBand] = indexBands[(hash + index) % indexBands.length];
+  const marketIndex = minBand + ((hash >> 3) % (maxBand - minBand + 1));
+  const inflationRate = Number((1.4 + ((hash >> 5) % 120) / 10).toFixed(1));
+  const marketRisk = deriveRiskLevel(marketIndex, inflationRate);
+  const riskSignal = deriveRiskSignal(marketIndex, inflationRate);
+  const demandTrend = deriveDemandTrend(marketIndex);
+  const supplyIndex = clamp(12 + ((hash >> 7) % 84), 10, 96);
+  const exportVolumeTon = (hash % 2 === 0 ? 1 : 0) * (180000 + ((hash >> 9) % 9200000));
+  const importVolumeTon = 120000 + ((hash >> 11) % 9800000);
+  const isExporter = exportVolumeTon > importVolumeTon * 0.75;
+  const tradeBalance = exportVolumeTon > importVolumeTon * 1.08 ? "surplus" : exportVolumeTon < importVolumeTon * 0.92 ? "deficit" : "neutral";
+  const tradeRelation = (["partner", "competitor", "none"] as const)[hash % 3];
+  const commodityA = commodityPool[hash % commodityPool.length];
+  const commodityB = commodityPool[(hash >> 4) % commodityPool.length];
+
+  return {
+    countryCode: seed.countryCode,
+    countryName: seed.countryName,
+    region: seed.region,
+    market: {
+      cornPriceIndex: clamp(Math.round(marketIndex + (((hash >> 13) % 17) - 8)), 6, 98),
+      inflationRate,
+      commodityImportUSD: 180 + ((hash >> 15) % 36000),
+      marketRisk,
+      marketIndex,
+      tradeBalance,
+      priceVolatility: marketRisk,
+      demandTrend,
+      riskSignal,
+      externalFactors: [
+        `Perubahan biaya logistik regional (${seed.region})`,
+        `Dinamika permintaan domestik ${seed.countryName}`,
+      ],
+    },
+    supply: {
+      supplyIndex,
+      isExporter,
+      exportVolumeTon,
+      importVolumeTon,
+      tradeRelation,
+      keyExportCommodities: commodityA === commodityB ? [commodityA] : [commodityA, commodityB],
+    },
+  };
+});
+
+export const countries: CountryData[] = [...baseCountries.map(rebalanceCountry), ...generatedCountries];

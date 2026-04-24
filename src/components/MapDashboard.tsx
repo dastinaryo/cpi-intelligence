@@ -31,6 +31,7 @@ const normalize = (value: string) =>
 const regionById = new Map(regions.map((region) => [region.regionId, region]));
 const regionByProvinceName = new Map(regions.map((region) => [normalize(region.provinsi), region]));
 const countryByCode = new Map(countries.map((country) => [country.countryCode, country]));
+const countryByName = new Map(countries.map((country) => [normalize(country.countryName), country]));
 
 const PROVINCE_ALIASES: Record<string, string> = {
   DKI_JAKARTA_RAYA: "DKI_JAKARTA",
@@ -50,6 +51,59 @@ const resolveRegionByProvinceName = (provinceName: string): RegionData | undefin
   if (!aliasId) return undefined;
 
   return regionById.get(aliasId);
+};
+
+const COUNTRY_NAME_ALIASES: Record<string, string> = {
+  UNITED_STATES: "USA",
+  UNITED_STATES_OF_AMERICA: "USA",
+  SOUTH_KOREA: "KOR",
+  REPUBLIC_OF_KOREA: "KOR",
+  RUSSIA: "RUS",
+  RUSSIAN_FEDERATION: "RUS",
+  VIET_NAM: "VNM",
+  COTE_D_IVOIRE: "CIV",
+  IVORY_COAST: "CIV",
+  CZECH_REPUBLIC: "CZE",
+  SYRIA: "SYR",
+  BOLIVIA_PLURINATIONAL_STATE_OF: "BOL",
+  VENEZUELA_BOLIVARIAN_REPUBLIC_OF: "VEN",
+  LAO_PEOPLE_S_DEMOCRATIC_REPUBLIC: "LAO",
+  UNITED_REPUBLIC_OF_TANZANIA: "TZA",
+};
+
+const resolveCountryFromFeature = (properties: Record<string, unknown>): CountryData | undefined => {
+  const candidateCodes = [
+    properties.code,
+    properties.ISO_A3,
+    properties.ISO_A3_EH,
+    properties.WB_A3,
+    properties.ADM0_A3,
+    properties.BRK_A3,
+    properties.GU_A3,
+    properties.SOV_A3,
+  ]
+    .filter((value): value is string => typeof value === "string" && value.length > 0)
+    .map((value) => value.toUpperCase());
+
+  for (const code of candidateCodes) {
+    const country = countryByCode.get(code);
+    if (country) return country;
+  }
+
+  const rawName =
+    (properties.ADMIN as string) ||
+    (properties.NAME as string) ||
+    (properties.name as string) ||
+    "";
+  if (!rawName) return undefined;
+
+  const nameKey = normalize(rawName);
+  const aliasCode = COUNTRY_NAME_ALIASES[nameKey];
+  if (aliasCode) {
+    return countryByCode.get(aliasCode);
+  }
+
+  return countryByName.get(nameKey);
 };
 
 const getLegend = (mode: DashboardMode, scope: CommodityScope) =>
@@ -242,13 +296,16 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
 
           geojson.features.forEach((feature: GeoJSON.Feature, index: number) => {
             const properties = (feature.properties || {}) as Record<string, unknown>;
-            const code = (properties.ISO_A3 as string) || (properties.ADM0_A3 as string) || "";
-            const country = countryByCode.get(code);
+            const country = resolveCountryFromFeature(properties);
             const metricValue = getMetricValue(undefined, country, mode, scope, supplyPerspective);
 
             properties.hasData = metricValue !== null;
             properties.value = metricValue ?? 0;
-            properties.code = code;
+            properties.code =
+              country?.countryCode ||
+              (properties.ISO_A3 as string) ||
+              (properties.ADM0_A3 as string) ||
+              "";
             feature.properties = properties;
             feature.id = index;
           });
@@ -317,8 +374,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
             const properties = (feature.properties || {}) as Record<string, unknown>;
             if (!properties.hasData) return;
 
-            const code = (properties.code as string) || (properties.ISO_A3 as string);
-            const country = countryByCode.get(code);
+            const country = resolveCountryFromFeature(properties);
             const metricValue = getMetricValue(undefined, country, mode, scope, supplyPerspective);
             if (!country || metricValue === null) return;
 
