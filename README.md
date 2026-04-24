@@ -104,6 +104,9 @@ Saat sesi web dimulai, hook `.claude/hooks/session-start.sh` otomatis menjalanka
 **Push perubahan ke GitHub** — cukup minta Claude:
 > "Commit dan push perubahan ini ke branch X"
 
+## Changelog
+- **2026-04-24**: Update `package-lock.json` — sinkronisasi dependency setelah `npm install` via session-start hook.
+
 ## Catatan Placeholder
 - Perhitungan `recommended source` dan `estimated logistics cost` masih berbasis heuristic dataset (belum optimasi rute/logistik riil).
 - AI assistant masih mock/starter behavior (menggunakan dataset QnA + context seed), belum terhubung ke model backend produksi.
