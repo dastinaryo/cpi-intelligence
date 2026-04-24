@@ -83,6 +83,17 @@ export interface StockHistory {
 }
  
 // ─────────────────────────────────────────────
+// DISTRICT DATA — INDONESIA (KABUPATEN/KOTA)
+// ─────────────────────────────────────────────
+
+export interface DistrictMarketData {
+  districtId: string;
+  districtName: string;   // matches GeoJSON NAME_2
+  provinceId: string;     // FK → RegionData.regionId
+  market: RegionMarketData;
+}
+
+// ─────────────────────────────────────────────
 // REGION DATA — INDONESIA (33 PROVINSI)
 // ─────────────────────────────────────────────
  
