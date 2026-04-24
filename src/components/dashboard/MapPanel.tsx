@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bot, Send, Sparkles, Trash2, X } from "lucide-react";
 import MapDashboard, { type MapSelection } from "@/components/MapDashboard";
 import { cn } from "@/lib/utils";
@@ -106,6 +106,10 @@ const MapPanel = ({
       text: "Hi! Saya AI Assistant. Gunakan suggested question untuk insight cepat berdasarkan filter dashboard saat ini.",
     },
   ];
+
+  useEffect(() => {
+    setSelection(null);
+  }, [commodityScope, dashboardMode, supplyPerspective]);
 
   const contextSeed = useMemo(() => {
     const lines = [
