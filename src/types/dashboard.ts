@@ -318,3 +318,78 @@ export interface MapLayerItem {
   relevantModes: DashboardMode[];
   relevantScopes: CommodityScope[];
 }
+
+// ─────────────────────────────────────────────
+// SUPPLY NETWORK (nodes + routes)
+// ─────────────────────────────────────────────
+
+export type NodeType = "feedmill" | "farm" | "warehouse" | "distribution";
+export type NodeStatus = "normal" | "high" | "bottleneck";
+export type RouteStatus = "normal" | "delayed" | "critical";
+
+export interface SupplyNode {
+  id: string;
+  type: NodeType;
+  name: string;
+  regionId: string;        // FK → RegionData.regionId
+  province: string;
+  city: string;
+  lng: number;
+  lat: number;
+  capacityTonPerMonth: number;
+  currentThroughputTon: number;
+  utilization: number;     // 0–100 (derived)
+  stockLevelTon: number;
+  stockCoverDays: number;
+  status: NodeStatus;      // derived
+  activeFarms?: number;    // populated for warehouse/distribution hubs
+  incomingSupplyTon?: number;
+  riskSignals: string[];
+}
+
+export interface SupplyRoute {
+  id: string;
+  fromNodeId: string;
+  toNodeId: string;
+  modality: "truck" | "rail" | "ship";
+  volumeTonPerWeek: number;
+  distanceKm: number;
+  leadTimeDays: number;
+  costPerKg: number;
+  status: RouteStatus;
+}
+
+// ─────────────────────────────────────────────
+// KPI CARDS
+// ─────────────────────────────────────────────
+
+export type KpiTone = "neutral" | "warning" | "critical";
+
+export interface KpiMetric {
+  id: string;
+  label: string;
+  value: string;           // formatted
+  unit?: string;
+  delta?: number;          // % change
+  deltaLabel?: string;     // e.g. "vs last week"
+  tone: KpiTone;
+  helper?: string;         // subtext
+}
+
+// ─────────────────────────────────────────────
+// NETWORK INSIGHTS (Supply / Logistics / Risk)
+// ─────────────────────────────────────────────
+
+export type NetworkInsightCategory = "supply" | "logistics" | "risk";
+
+export interface NetworkInsightItem {
+  text: string;
+  type: "observation" | "risk" | "opportunity" | "recommendation";
+  nodeId?: string;
+}
+
+export interface NetworkInsightGroup {
+  category: NetworkInsightCategory;
+  title: string;
+  items: NetworkInsightItem[];
+}

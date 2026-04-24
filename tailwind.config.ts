@@ -55,6 +55,11 @@ export default {
           DEFAULT: "hsl(var(--trend-down))",
           foreground: "hsl(var(--trend-down-foreground))",
         },
+        status: {
+          normal: "hsl(var(--status-normal))",
+          high: "hsl(var(--status-high))",
+          critical: "hsl(var(--status-critical))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

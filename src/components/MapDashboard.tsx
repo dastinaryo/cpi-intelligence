@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef } from "react";
 import maplibregl, { Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { countries, legendConfigs, regions } from "@/data";
+import { countries, legendConfigs, regions, supplyNodes, supplyRoutes } from "@/data";
 import type {
   CommodityScope,
   CountryData,
   DashboardMode,
+  NodeStatus,
+  NodeType,
   RegionData,
+  SupplyNode,
   SupplyTab,
 } from "@/types/dashboard";
 
@@ -15,7 +18,35 @@ const COUNTRIES_URL =
 const INDONESIA_KABKOTA_URL =
   "https://raw.githubusercontent.com/rifani/geojson-political-indonesia/master/IDN_adm_2_kabkota.json";
 
-const NO_DATA_COLOR = "#e5e7eb";
+const NO_DATA_COLOR = "#f1f1f1";
+
+// Monochrome supply fill (much lighter so nodes pop)
+const MONO_SUPPLY_STOPS = [
+  { minValue: 0, color: "#c8c8c8" },
+  { minValue: 40, color: "#d9d9d9" },
+  { minValue: 60, color: "#ebebeb" },
+  { minValue: 80, color: "#f2f2f2" },
+];
+
+// Status colors for nodes & routes
+const STATUS_COLORS: Record<NodeStatus, string> = {
+  normal: "#22c55e",
+  high: "#f59e0b",
+  bottleneck: "#ef4444",
+};
+
+const ROUTE_COLORS = {
+  normal: "#6b7280",
+  delayed: "#f59e0b",
+  critical: "#ef4444",
+} as const;
+
+const NODE_RADIUS: Record<NodeType, number> = {
+  feedmill: 9,
+  warehouse: 8,
+  distribution: 7,
+  farm: 6,
+};
 
 const clamp = (value: number, min = 0, max = 100) => Math.max(min, Math.min(max, value));
 
@@ -23,13 +54,14 @@ const normalize = (value: string) =>
   value
     .toUpperCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^A-Z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 
 const regionById = new Map(regions.map((region) => [region.regionId, region]));
 const regionByProvinceName = new Map(regions.map((region) => [normalize(region.provinsi), region]));
 const countryByCode = new Map(countries.map((country) => [country.countryCode, country]));
+const nodeById = new Map(supplyNodes.map((n) => [n.id, n]));
 
 const PROVINCE_ALIASES: Record<string, string> = {
   DKI_JAKARTA_RAYA: "DKI_JAKARTA",
@@ -44,10 +76,8 @@ const resolveRegionByProvinceName = (provinceName: string): RegionData | undefin
   const key = normalize(provinceName);
   const direct = regionByProvinceName.get(key);
   if (direct) return direct;
-
   const aliasId = PROVINCE_ALIASES[key];
   if (!aliasId) return undefined;
-
   return regionById.get(aliasId);
 };
 
@@ -58,7 +88,6 @@ const getLocalSupplyValue = (region: RegionData, perspective: SupplyTab) => {
   if (perspective === "mitra") {
     return clamp(50 + region.supply.surplusShortage / 22);
   }
-
   const serviceGap = region.supply.supplyIndex - region.supply.demandIndex;
   return clamp(50 + serviceGap * 2.2);
 };
@@ -67,7 +96,6 @@ const getGlobalSupplyValue = (country: CountryData, perspective: SupplyTab) => {
   if (perspective === "mitra") {
     return clamp(country.supply.supplyIndex);
   }
-
   const tradeBase = Math.max(country.supply.exportVolumeTon + country.supply.importVolumeTon, 1);
   const normalizedTradeBalance =
     ((country.supply.exportVolumeTon - country.supply.importVolumeTon) / tradeBase) * 50;
@@ -85,7 +113,6 @@ const getMetricValue = (
     if (!region) return null;
     return mode === "market" ? region.market.marketIndex : getLocalSupplyValue(region, perspective);
   }
-
   if (!country) return null;
   return mode === "market" ? country.market.marketIndex : getGlobalSupplyValue(country, perspective);
 };
@@ -105,18 +132,69 @@ const buildColorExpressionStops = (
   legend: { minValue: number; maxValue: number; color: string }[],
 ): Array<number | string> => {
   if (legend.length === 0) {
-    return [0, "#f8fafc", 100, "#1d4ed8"];
+    return [0, "#f3f4f6", 100, "#1f2937"];
   }
-
   const stops: Array<number | string> = [];
   legend.forEach((stop) => {
     stops.push(stop.minValue, stop.color);
   });
-
   const last = legend[legend.length - 1];
   stops.push(last.maxValue, last.color);
   return stops;
 };
+
+const buildMonochromeStops = (): Array<number | string> => {
+  const stops: Array<number | string> = [];
+  MONO_SUPPLY_STOPS.forEach((s) => {
+    stops.push(s.minValue, s.color);
+  });
+  return stops;
+};
+
+const buildNodesGeoJSON = (): GeoJSON.FeatureCollection => ({
+  type: "FeatureCollection",
+  features: supplyNodes.map((node) => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [node.lng, node.lat] },
+    properties: {
+      id: node.id,
+      name: node.name,
+      type: node.type,
+      status: node.status,
+      utilization: node.utilization,
+      radius: NODE_RADIUS[node.type],
+      statusColor: STATUS_COLORS[node.status],
+    },
+  })),
+});
+
+const buildRoutesGeoJSON = (): GeoJSON.FeatureCollection => ({
+  type: "FeatureCollection",
+  features: supplyRoutes
+    .map((route) => {
+      const from = nodeById.get(route.fromNodeId);
+      const to = nodeById.get(route.toNodeId);
+      if (!from || !to) return null;
+      return {
+        type: "Feature" as const,
+        geometry: {
+          type: "LineString" as const,
+          coordinates: [
+            [from.lng, from.lat],
+            [to.lng, to.lat],
+          ],
+        },
+        properties: {
+          id: route.id,
+          status: route.status,
+          volume: route.volumeTonPerWeek,
+          strokeColor: ROUTE_COLORS[route.status],
+          strokeWidth: route.status === "normal" ? 1.4 : 2.2,
+        },
+      };
+    })
+    .filter((f): f is NonNullable<typeof f> => f !== null),
+});
 
 export interface MapSelection {
   scope: CommodityScope;
@@ -127,6 +205,7 @@ export interface MapSelection {
   metricValue: number;
   region?: RegionData;
   country?: CountryData;
+  node?: SupplyNode;
 }
 
 interface MapDashboardProps {
@@ -134,9 +213,16 @@ interface MapDashboardProps {
   mode: DashboardMode;
   supplyPerspective: SupplyTab;
   onRegionSelect?: (selection: MapSelection) => void;
+  onNodeSelect?: (node: SupplyNode) => void;
 }
 
-const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDashboardProps) => {
+const MapDashboard = ({
+  scope,
+  mode,
+  supplyPerspective,
+  onRegionSelect,
+  onNodeSelect,
+}: MapDashboardProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MLMap | null>(null);
@@ -144,6 +230,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
 
   const legend = useMemo(() => getLegend(mode, scope), [mode, scope]);
   const metricLabel = getMetricLabel(mode, scope, supplyPerspective, legend?.metricLabel ?? "Score");
+  const showNetwork = mode === "supply" && scope === "local";
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -151,7 +238,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
     const showTooltip = (x: number, y: number, text: string) => {
       const element = tooltipRef.current;
       if (!element) return;
-      element.textContent = text;
+      element.innerHTML = text;
       element.style.transform = `translate(${x + 12}px, ${y + 12}px)`;
       element.style.opacity = "1";
     };
@@ -170,9 +257,9 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           "carto-light": {
             type: "raster",
             tiles: [
-              "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-              "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-              "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
+              "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png",
+              "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png",
+              "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png",
             ],
             tileSize: 256,
             attribution:
@@ -181,7 +268,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
         },
         layers: [{ id: "carto-light", type: "raster", source: "carto-light" }],
       },
-      center: scope === "local" ? [118, -2.5] : [118, -2.5],
+      center: [118, -2.5],
       zoom: scope === "local" ? 4.2 : 2.2,
       attributionControl: { compact: true },
     });
@@ -190,7 +277,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
 
     map.addControl(
       new maplibregl.NavigationControl({ showCompass: false, visualizePitch: false }),
-      "top-left",
+      "top-right",
     );
 
     map.scrollZoom.setWheelZoomRate(1 / 200);
@@ -203,8 +290,97 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
       hoveredIdRef.current = null;
     };
 
+    const addNetworkLayers = () => {
+      if (!showNetwork) return;
+
+      // Routes (lines) - below nodes
+      map.addSource("routes", { type: "geojson", data: buildRoutesGeoJSON() });
+      map.addLayer({
+        id: "routes-casing",
+        type: "line",
+        source: "routes",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": ["+", ["get", "strokeWidth"], 1.5],
+          "line-opacity": 0.7,
+        },
+      });
+      map.addLayer({
+        id: "routes-line",
+        type: "line",
+        source: "routes",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": ["get", "strokeColor"],
+          "line-width": ["get", "strokeWidth"],
+          "line-opacity": 0.9,
+          "line-dasharray": [
+            "case",
+            ["==", ["get", "status"], "delayed"],
+            ["literal", [2, 2]],
+            ["literal", [1, 0]],
+          ],
+        },
+      });
+
+      // Nodes (circles)
+      map.addSource("nodes", { type: "geojson", data: buildNodesGeoJSON() });
+      map.addLayer({
+        id: "nodes-halo",
+        type: "circle",
+        source: "nodes",
+        paint: {
+          "circle-radius": ["+", ["get", "radius"], 4],
+          "circle-color": ["get", "statusColor"],
+          "circle-opacity": 0.18,
+        },
+      });
+      map.addLayer({
+        id: "nodes-circle",
+        type: "circle",
+        source: "nodes",
+        paint: {
+          "circle-radius": ["get", "radius"],
+          "circle-color": ["get", "statusColor"],
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 2,
+          "circle-opacity": 0.95,
+        },
+      });
+
+      map.on("mousemove", "nodes-circle", (event) => {
+        if (!event.features?.length) return;
+        const props = event.features[0].properties as Record<string, unknown>;
+        map.getCanvas().style.cursor = "pointer";
+        const name = String(props.name || "");
+        const type = String(props.type || "");
+        const util = Number(props.utilization || 0);
+        const status = String(props.status || "");
+        showTooltip(
+          event.point.x,
+          event.point.y,
+          `<div class="font-semibold">${name}</div><div class="opacity-70 text-[10px] uppercase">${type} · ${status}</div><div class="tabular-nums">Util: ${util.toFixed(0)}%</div>`,
+        );
+      });
+
+      map.on("mouseleave", "nodes-circle", () => {
+        map.getCanvas().style.cursor = "";
+        hideTooltip();
+      });
+
+      map.on("click", "nodes-circle", (event) => {
+        const feature = event.features?.[0];
+        if (!feature) return;
+        const id = String((feature.properties as Record<string, unknown>).id || "");
+        const node = nodeById.get(id);
+        if (node) onNodeSelect?.(node);
+      });
+    };
+
     map.on("load", async () => {
-      const colorStops = buildColorExpressionStops(legend?.stops ?? []);
+      const defaultColorStops = buildColorExpressionStops(legend?.stops ?? []);
+      const colorStops = showNetwork ? buildMonochromeStops() : defaultColorStops;
 
       if (scope === "global") {
         try {
@@ -313,7 +489,6 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
             });
           }
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error("Failed to load countries GeoJSON", error);
         }
 
@@ -350,7 +525,9 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
               ["interpolate", ["linear"], ["coalesce", ["get", "value"], 0], ...colorStops],
               NO_DATA_COLOR,
             ],
-            "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.78, 0.52],
+            "fill-opacity": showNetwork
+              ? ["case", ["boolean", ["feature-state", "hover"], false], 0.65, 0.4]
+              : ["case", ["boolean", ["feature-state", "hover"], false], 0.78, 0.52],
           },
         });
 
@@ -415,6 +592,9 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           });
         });
 
+        // Add network overlay AFTER region layers so it renders on top
+        addNetworkLayers();
+
         const defaultRegion = regionById.get("DKI_JAKARTA") ?? regions[0];
         const defaultValue = getMetricValue(defaultRegion, undefined, mode, scope, supplyPerspective);
         if (defaultRegion && defaultValue !== null) {
@@ -429,7 +609,6 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           });
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Failed to load Indonesia kabupaten GeoJSON", error);
       }
     });
@@ -438,10 +617,10 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
       map.remove();
       mapRef.current = null;
     };
-  }, [legend?.stops, metricLabel, mode, onRegionSelect, scope, supplyPerspective]);
+  }, [legend?.stops, metricLabel, mode, onNodeSelect, onRegionSelect, scope, showNetwork, supplyPerspective]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden rounded-lg border border-border bg-card">
       <div ref={containerRef} className="absolute inset-0" />
 
       <div
@@ -450,28 +629,57 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
         style={{ opacity: 0 }}
       />
 
-      <div className="pointer-events-none absolute bottom-4 left-4 z-20">
-        <div className="pointer-events-auto flex h-56 w-52 flex-col rounded-xl border border-border bg-card/95 px-4 py-3 shadow-xl backdrop-blur">
-          <div className="text-xs font-semibold tracking-wide text-foreground">Legend</div>
-          <div className="mb-3 text-[11px] text-muted-foreground">{metricLabel}</div>
-          <ul className="space-y-2">
-            {(legend?.stops ?? []).map((item) => (
-              <li key={`${item.minValue}-${item.maxValue}`} className="flex items-center gap-2">
-                <span
-                  className="h-3 w-3 rounded-sm border border-border"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className="text-[11px] text-muted-foreground">{item.label}</span>
-              </li>
-            ))}
-            <li className="flex items-center gap-2">
-              <span
-                className="h-3 w-3 rounded-sm border border-border"
-                style={{ backgroundColor: NO_DATA_COLOR }}
-              />
-              <span className="text-[11px] text-muted-foreground">Tidak Ada Data</span>
-            </li>
-          </ul>
+      {/* Legend - bottom right, monochrome style */}
+      <div className="pointer-events-none absolute bottom-3 right-3 z-20">
+        <div className="pointer-events-auto flex flex-col gap-2 rounded-md border border-border bg-card/95 px-3 py-2.5 shadow-sm backdrop-blur">
+          {showNetwork ? (
+            <>
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground">
+                Network nodes
+              </div>
+              <ul className="flex flex-col gap-1">
+                <li className="flex items-center gap-2 text-[11px] text-foreground/80">
+                  <span className="h-2.5 w-2.5 rounded-full bg-status-normal ring-2 ring-white" />
+                  Normal
+                </li>
+                <li className="flex items-center gap-2 text-[11px] text-foreground/80">
+                  <span className="h-2.5 w-2.5 rounded-full bg-status-high ring-2 ring-white" />
+                  High utilization
+                </li>
+                <li className="flex items-center gap-2 text-[11px] text-foreground/80">
+                  <span className="h-2.5 w-2.5 rounded-full bg-status-critical ring-2 ring-white" />
+                  Bottleneck
+                </li>
+              </ul>
+              <div className="mt-1 border-t border-border pt-1.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
+                Node types
+              </div>
+              <ul className="flex flex-col gap-0.5 text-[10px] text-muted-foreground">
+                <li>● Feedmill  ● Warehouse</li>
+                <li>● Dist. point  ● Farm cluster</li>
+              </ul>
+            </>
+          ) : (
+            <>
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-foreground">
+                {metricLabel}
+              </div>
+              <ul className="flex flex-col gap-1">
+                {(legend?.stops ?? []).map((item) => (
+                  <li
+                    key={`${item.minValue}-${item.maxValue}`}
+                    className="flex items-center gap-2 text-[11px] text-foreground/80"
+                  >
+                    <span
+                      className="h-2.5 w-2.5 rounded-sm border border-border"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </div>
     </div>

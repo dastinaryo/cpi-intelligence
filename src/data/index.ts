@@ -9,4 +9,5 @@ export { marketSignals } from "./marketSignals";
 export { insights } from "./insights";
 export { aiQuestions } from "./aiQuestions";
 export { legendConfigs, mapLayerItems } from "./mapLegend.ts";
+export { supplyNodes, supplyRoutes } from "./supplyNetwork";
 
