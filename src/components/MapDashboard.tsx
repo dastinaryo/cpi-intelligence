@@ -333,19 +333,6 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
             });
           });
 
-          const defaultCountry = countryByCode.get("IDN") ?? countries[0];
-          const defaultValue = getMetricValue(undefined, defaultCountry, mode, scope, supplyPerspective);
-          if (defaultCountry && defaultValue !== null) {
-            onRegionSelect?.({
-              scope,
-              mode,
-              id: defaultCountry.countryCode,
-              name: defaultCountry.countryName,
-              metricLabel,
-              metricValue: defaultValue,
-              country: defaultCountry,
-            });
-          }
         } catch (error) {
           console.error("Failed to load countries GeoJSON", error);
         }
@@ -483,47 +470,6 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           });
         });
 
-        if (mode === "market") {
-          const defaultFeature = geojson.features.find((feature: GeoJSON.Feature) => {
-            const properties = (feature.properties || {}) as Record<string, unknown>;
-            return Boolean(properties.hasData && properties.regionId && properties.districtName);
-          });
-
-          if (defaultFeature) {
-            const properties = (defaultFeature.properties || {}) as Record<string, unknown>;
-            const region = regionById.get(properties.regionId as string);
-            const districtName = properties.districtName as string;
-            const districtType = properties.districtType as string | undefined;
-
-            if (region && districtName) {
-              const district = createDistrictMarketData(region, districtName, districtType);
-              onRegionSelect?.({
-                scope,
-                mode,
-                id: district.districtId,
-                name: districtType ? `${districtType} ${district.districtName}` : district.districtName,
-                metricLabel,
-                metricValue: district.market.marketIndex,
-                district,
-                region,
-              });
-            }
-          }
-        } else {
-          const defaultRegion = regionById.get("DKI_JAKARTA") ?? regions[0];
-          const defaultValue = getMetricValue(defaultRegion, undefined, mode, scope, supplyPerspective);
-          if (defaultRegion && defaultValue !== null) {
-            onRegionSelect?.({
-              scope,
-              mode,
-              id: defaultRegion.regionId,
-              name: defaultRegion.provinsi,
-              metricLabel,
-              metricValue: defaultValue,
-              region: defaultRegion,
-            });
-          }
-        }
       } catch (error) {
         console.error("Failed to load Indonesia kabupaten GeoJSON", error);
       }
@@ -547,7 +493,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
 
       <div className="pointer-events-none absolute bottom-4 left-4 z-20">
         <div className="pointer-events-auto flex h-56 w-52 flex-col rounded-xl border border-border bg-card/95 px-4 py-3 shadow-xl backdrop-blur">
-          <div className="text-xs font-semibold tracking-wide text-foreground">Legend</div>
+          <div className="text-xs font-semibold tracking-wide text-foreground">Indikator</div>
           <div className="mb-3 text-[11px] text-muted-foreground">{metricLabel}</div>
           <ul className="space-y-2">
             {(legend?.stops ?? []).map((item) => (
@@ -559,13 +505,6 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                 <span className="text-[11px] text-muted-foreground">{item.label}</span>
               </li>
             ))}
-            <li className="flex items-center gap-2">
-              <span
-                className="h-3 w-3 rounded-sm border border-border"
-                style={{ backgroundColor: NO_DATA_COLOR }}
-              />
-              <span className="text-[11px] text-muted-foreground">Tidak Ada Data</span>
-            </li>
           </ul>
         </div>
       </div>
