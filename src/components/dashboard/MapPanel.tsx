@@ -259,10 +259,22 @@ const MapPanel = ({
                   <>
                     <p>Corn Price Index: {selection.country.market.cornPriceIndex}</p>
                     <p>Inflasi: {selection.country.market.inflationRate.toFixed(1)}%</p>
+                    <p>Risk Signal: <span className={selection.country.market.riskSignal === "green" ? "text-green-500" : selection.country.market.riskSignal === "red" ? "text-red-500" : "text-yellow-500"}>{selection.country.market.riskSignal.toUpperCase()}</span></p>
                     <p>Market Risk: {selection.country.market.marketRisk}</p>
+                    <p>Price Volatility: {selection.country.market.priceVolatility}</p>
+                    <p>Demand Trend: {selection.country.market.demandTrend}</p>
                     <p>Trade Balance: {selection.country.market.tradeBalance}</p>
                     <p>Commodity Import: USD {formatNumber(selection.country.market.commodityImportUSD)} juta</p>
-                    <p>Trend: Market index {selection.country.market.marketIndex}</p>
+                    {selection.country.market.externalFactors.length > 0 && (
+                      <div className="mt-1.5 border-t border-border pt-1.5">
+                        <p className="mb-1 font-semibold text-muted-foreground">Faktor Eksternal:</p>
+                        <ul className="space-y-0.5">
+                          {selection.country.market.externalFactors.map((factor) => (
+                            <li key={factor} className="text-[10px] leading-tight text-foreground/80">• {factor}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </>
                 ) : null}
               </div>

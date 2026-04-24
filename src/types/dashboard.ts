@@ -144,6 +144,10 @@ export interface CountryMarketData {
   marketRisk: RiskLevel;
   marketIndex: number;          // 0–100 derived
   tradeBalance: "surplus" | "deficit" | "neutral";
+  priceVolatility: RiskLevel;
+  demandTrend: DemandTrend;
+  riskSignal: RiskSignal;
+  externalFactors: string[];
 }
  
 export interface CountrySupplyData {
