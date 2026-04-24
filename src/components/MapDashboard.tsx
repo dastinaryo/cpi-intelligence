@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
-import maplibregl, { Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
+import maplibregl, { type ExpressionSpecification, Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { countries, legendConfigs, regions } from "@/data";
+import { countries, createDistrictMarketData, legendConfigs, regions } from "@/data";
 import type {
   CommodityScope,
   CountryData,
   DashboardMode,
+  DistrictMarketData,
   RegionData,
   SupplyTab,
 } from "@/types/dashboard";
@@ -118,6 +119,30 @@ const buildColorExpressionStops = (
   return stops;
 };
 
+const buildInterpolateColorExpression = (
+  legend: { minValue: number; maxValue: number; color: string }[],
+) => ["interpolate", ["linear"], ["coalesce", ["get", "value"], 0], ...buildColorExpressionStops(legend)] as ExpressionSpecification;
+
+const buildStepColorExpression = (
+  legend: { minValue: number; maxValue: number; color: string }[],
+) => {
+  if (legend.length === 0) {
+    return ["step", ["coalesce", ["get", "value"], 0], "#f8fafc", 50, "#1d4ed8"] as ExpressionSpecification;
+  }
+
+  const expression: ExpressionSpecification = [
+    "step",
+    ["coalesce", ["get", "value"], 0],
+    legend[0].color,
+  ];
+
+  legend.slice(1).forEach((stop) => {
+    expression.push(stop.minValue, stop.color);
+  });
+
+  return expression;
+};
+
 export interface MapSelection {
   scope: CommodityScope;
   mode: DashboardMode;
@@ -125,6 +150,7 @@ export interface MapSelection {
   name: string;
   metricLabel: string;
   metricValue: number;
+  district?: DistrictMarketData;
   region?: RegionData;
   country?: CountryData;
 }
@@ -204,7 +230,10 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
     };
 
     map.on("load", async () => {
-      const colorStops = buildColorExpressionStops(legend?.stops ?? []);
+      const useSteppedMarketColors = mode === "market";
+      const fillColorExpression = useSteppedMarketColors
+        ? buildStepColorExpression(legend?.stops ?? [])
+        : buildInterpolateColorExpression(legend?.stops ?? []);
 
       if (scope === "global") {
         try {
@@ -234,10 +263,15 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
               "fill-color": [
                 "case",
                 ["==", ["get", "hasData"], true],
-                ["interpolate", ["linear"], ["coalesce", ["get", "value"], 0], ...colorStops],
+                fillColorExpression,
                 NO_DATA_COLOR,
               ],
-              "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.9, 0.68],
+              "fill-opacity": [
+                "case",
+                ["boolean", ["feature-state", "hover"], false],
+                0.82,
+                useSteppedMarketColors ? 0.56 : 0.68,
+              ],
             },
           });
 
@@ -327,10 +361,21 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
         geojson.features.forEach((feature: GeoJSON.Feature, index: number) => {
           const properties = (feature.properties || {}) as Record<string, unknown>;
           const provinceName = (properties.NAME_1 as string) || "";
+          const districtName = (properties.NAME_2 as string) || "";
+          const districtType = (properties.TYPE_2 as string) || undefined;
           const region = resolveRegionByProvinceName(provinceName);
-          const metricValue = getMetricValue(region, undefined, mode, scope, supplyPerspective);
+          const district =
+            mode === "market" && region && districtName
+              ? createDistrictMarketData(region, districtName, districtType)
+              : undefined;
+          const metricValue = district
+            ? district.market.marketIndex
+            : getMetricValue(region, undefined, mode, scope, supplyPerspective);
 
           properties.regionId = region?.regionId;
+          properties.districtId = district?.districtId;
+          properties.districtName = district?.districtName ?? districtName;
+          properties.districtType = district?.districtType ?? districtType;
           properties.hasData = metricValue !== null;
           properties.value = metricValue ?? 0;
           feature.properties = properties;
@@ -347,10 +392,15 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
             "fill-color": [
               "case",
               ["==", ["get", "hasData"], true],
-              ["interpolate", ["linear"], ["coalesce", ["get", "value"], 0], ...colorStops],
+              fillColorExpression,
               NO_DATA_COLOR,
             ],
-            "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.78, 0.52],
+            "fill-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              0.8,
+              useSteppedMarketColors ? 0.54 : 0.52,
+            ],
           },
         });
 
@@ -399,10 +449,29 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           if (!feature) return;
           const properties = (feature.properties || {}) as Record<string, unknown>;
           const regionId = properties.regionId as string;
+          const districtName = (properties.districtName as string) || (properties.NAME_2 as string) || "";
+          const districtType = (properties.districtType as string) || (properties.TYPE_2 as string) || undefined;
 
           const region = regionId ? regionById.get(regionId) : undefined;
+          if (!region) return;
+
+          if (mode === "market" && districtName) {
+            const district = createDistrictMarketData(region, districtName, districtType);
+            onRegionSelect?.({
+              scope,
+              mode,
+              id: district.districtId,
+              name: districtType ? `${districtType} ${district.districtName}` : district.districtName,
+              metricLabel,
+              metricValue: district.market.marketIndex,
+              district,
+              region,
+            });
+            return;
+          }
+
           const metricValue = getMetricValue(region, undefined, mode, scope, supplyPerspective);
-          if (!region || metricValue === null) return;
+          if (metricValue === null) return;
 
           onRegionSelect?.({
             scope,
@@ -415,18 +484,46 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           });
         });
 
-        const defaultRegion = regionById.get("DKI_JAKARTA") ?? regions[0];
-        const defaultValue = getMetricValue(defaultRegion, undefined, mode, scope, supplyPerspective);
-        if (defaultRegion && defaultValue !== null) {
-          onRegionSelect?.({
-            scope,
-            mode,
-            id: defaultRegion.regionId,
-            name: defaultRegion.provinsi,
-            metricLabel,
-            metricValue: defaultValue,
-            region: defaultRegion,
+        if (mode === "market") {
+          const defaultFeature = geojson.features.find((feature: GeoJSON.Feature) => {
+            const properties = (feature.properties || {}) as Record<string, unknown>;
+            return Boolean(properties.hasData && properties.regionId && properties.districtName);
           });
+
+          if (defaultFeature) {
+            const properties = (defaultFeature.properties || {}) as Record<string, unknown>;
+            const region = regionById.get(properties.regionId as string);
+            const districtName = properties.districtName as string;
+            const districtType = properties.districtType as string | undefined;
+
+            if (region && districtName) {
+              const district = createDistrictMarketData(region, districtName, districtType);
+              onRegionSelect?.({
+                scope,
+                mode,
+                id: district.districtId,
+                name: districtType ? `${districtType} ${district.districtName}` : district.districtName,
+                metricLabel,
+                metricValue: district.market.marketIndex,
+                district,
+                region,
+              });
+            }
+          }
+        } else {
+          const defaultRegion = regionById.get("DKI_JAKARTA") ?? regions[0];
+          const defaultValue = getMetricValue(defaultRegion, undefined, mode, scope, supplyPerspective);
+          if (defaultRegion && defaultValue !== null) {
+            onRegionSelect?.({
+              scope,
+              mode,
+              id: defaultRegion.regionId,
+              name: defaultRegion.provinsi,
+              metricLabel,
+              metricValue: defaultValue,
+              region: defaultRegion,
+            });
+          }
         }
       } catch (error) {
         // eslint-disable-next-line no-console

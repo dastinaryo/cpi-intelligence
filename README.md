@@ -14,7 +14,7 @@ Dashboard mockup untuk simulasi **market intelligence** dan **supply chain intel
 - Highlight cards dinamis sesuai `scope` + `mode`.
 - Competitor dropdown (`JPFA`, `MAIN`, `SIPD`) dengan nilai dan % perubahan dari dataset `stocks`.
 - Map dinamis:
-  - `local`: Indonesia (kab/kota overlay, nilai di-drive oleh data provinsi)
+  - `local`: Indonesia (kab/kota overlay, `market mode` bervariasi di level kabupaten/kota)
   - `global`: negara (country-level)
   - `market mode`: metrik market intelligence
   - `supply mode`: metrik supply intelligence

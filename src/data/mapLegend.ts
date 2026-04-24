@@ -10,13 +10,14 @@ const BLUE_STOPS = [
   { minValue: 80,  maxValue: 100, color: "#08519c", label: "Sangat Tinggi" },
 ];
 
-// Market mode — diverging palette (cool → warm) to highlight market heat
+// Market mode — categorical hues to keep regions distinct without overly dark fills
 const MARKET_STOPS = [
-  { minValue: 0,   maxValue: 20,  color: "#2c7bb6", label: "Pasar Lemah" },
-  { minValue: 20,  maxValue: 40,  color: "#abd9e9", label: "Pasar Lesu" },
-  { minValue: 40,  maxValue: 60,  color: "#ffffbf", label: "Pasar Stabil" },
-  { minValue: 60,  maxValue: 80,  color: "#fdae61", label: "Pasar Aktif" },
-  { minValue: 80,  maxValue: 100, color: "#d7191c", label: "Pasar Panas" },
+  { minValue: 0,   maxValue: 15,  color: "#c9ced6", label: "Sangat Lemah" },
+  { minValue: 15,  maxValue: 30,  color: "#71a7ff", label: "Lemah" },
+  { minValue: 30,  maxValue: 45,  color: "#78c27d", label: "Mulai Tumbuh" },
+  { minValue: 45,  maxValue: 60,  color: "#f3d36b", label: "Stabil" },
+  { minValue: 60,  maxValue: 75,  color: "#b38cff", label: "Aktif" },
+  { minValue: 75,  maxValue: 100, color: "#ef6b73", label: "Sangat Aktif" },
 ];
  
 // Red-to-green for surplus/shortage (supply mode)
@@ -100,4 +101,3 @@ export const mapLayerItems: MapLayerItem[] = [
     relevantScopes: ["local", "global"],
   },
 ];
-

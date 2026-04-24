@@ -8,5 +8,5 @@ export { pelangganList } from "./pelanggan";
 export { marketSignals } from "./marketSignals";
 export { insights } from "./insights";
 export { aiQuestions } from "./aiQuestions";
+export { buildDistrictId, createDistrictMarketData } from "./districtMarkets";
 export { legendConfigs, mapLayerItems } from "./mapLegend.ts";
-
