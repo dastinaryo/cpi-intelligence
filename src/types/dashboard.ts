@@ -95,6 +95,15 @@ export interface DistrictMarketData {
   market: RegionMarketData;
 }
 
+export interface DistrictSupplyData {
+  districtId: string;
+  districtName: string;
+  provinceId: string;
+  provinceName?: string;
+  districtType?: string;
+  supply: RegionSupplyData;
+}
+
 // ─────────────────────────────────────────────
 // REGION DATA — INDONESIA (33 PROVINSI)
 // ─────────────────────────────────────────────

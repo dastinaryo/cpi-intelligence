@@ -1,6 +1,7 @@
 import type {
   DemandTrend,
   DistrictMarketData,
+  DistrictSupplyData,
   RegionData,
   RegionMarketData,
   RiskLevel,
@@ -96,5 +97,43 @@ export const createDistrictMarketData = (
     provinceId: region.regionId,
     provinceName: region.provinsi,
     market,
+  };
+};
+
+export const createDistrictSupplyData = (
+  region: RegionData,
+  districtName: string,
+  districtType?: string,
+): DistrictSupplyData => {
+  const seed = hashString(`${region.regionId}:SUPPLY:${normalize(districtName)}`);
+  const variance = (seed % 13) - 6;
+  const demandVariance = ((seed >> 4) % 11) - 5;
+  const supplyDelta = Math.round(variance * 18 + demandVariance * 9);
+  const demandDelta = Math.round(demandVariance * 14 + variance * 5);
+
+  const suppliesVolumeTon = Math.max(40, region.supply.suppliesVolumeTon + supplyDelta);
+  const salesVolumeTon = Math.max(35, region.supply.salesVolumeTon + demandDelta);
+  const surplusShortage = suppliesVolumeTon - salesVolumeTon;
+  const supplyIndex = Math.round(clamp(region.supply.supplyIndex + variance * 1.6, 18, 98));
+  const demandIndex = Math.round(clamp(region.supply.demandIndex + demandVariance * 1.4, 15, 98));
+  const yoyGrowth = Number(clamp(region.supply.yoyGrowth + variance * 0.18, -8, 18).toFixed(1));
+
+  return {
+    districtId: buildDistrictId(region.regionId, districtName),
+    districtName,
+    districtType,
+    provinceId: region.regionId,
+    provinceName: region.provinsi,
+    supply: {
+      supplyIndex,
+      demandIndex,
+      surplusShortage,
+      totalMitraAktif: Math.max(0, Math.round(region.supply.totalMitraAktif + variance / 2)),
+      totalPelanggan: Math.max(1, Math.round(region.supply.totalPelanggan + demandVariance / 2)),
+      salesVolumeTon,
+      suppliesVolumeTon,
+      yoyGrowth,
+      allocationStatus: surplusShortage > 40 ? "surplus" : surplusShortage < -40 ? "shortage" : "balanced",
+    },
   };
 };

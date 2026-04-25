@@ -6,23 +6,23 @@ export const insights: InsightContent[] = [
     id: "INS-market-local",
     mode: "market",
     scope: "local",
-    title: "Market Insights",
+    title: "Local Insights",
     items: [
       {
-        text: "Harga jagung lokal naik 2.3% MoM, dipicu penurunan pasokan dari Jawa Timur akibat cuaca kering El Niño.",
+        text: "Kenaikan harga jagung di sentra Jatim dan Jateng belum sepenuhnya diteruskan ke harga ayam retail; spread feed-to-livebird melebar dan menekan margin farm plasma di wilayah urban.",
         type: "observation",
       },
       {
-        text: "Tekanan inflasi bahan pokok di Sumatera Utara mencapai 4.8% YoY — tertinggi dalam 14 bulan. Risiko daya beli konsumen melemah.",
+        text: "Wilayah dengan inflasi pangan >4% YoY menunjukkan perlambatan volume premium product; risiko trading-down meningkat dalam 4–8 minggu ke depan jika harga tidak direkalibrasi.",
         type: "risk",
-        severity: "medium",
+        severity: "high",
       },
       {
-        text: "Permintaan ayam potong di Jabodetabek tumbuh 8.2% YoY pasca Lebaran — peluang ekspansi kapasitas distribusi ke segmen HORECA.",
+        text: "Permintaan HORECA di klaster Jabodetabek–Bandung pulih lebih cepat dari channel tradisional; momentum ini mendukung mix-shift ke produk bernilai tambah dengan gross margin lebih baik.",
         type: "opportunity",
       },
       {
-        text: "Pertimbangkan hedging kontrak jagung Q3 2024 untuk mitigasi risiko kenaikan HPP dan dampak El Niño.",
+        text: "Prioritaskan repricing bertahap per klaster kota, bukan nasional sekaligus: fokus dulu area dengan elastisitas rendah untuk memulihkan margin tanpa memicu penurunan volume tajam.",
         type: "recommendation",
       },
     ],
@@ -35,23 +35,52 @@ export const insights: InsightContent[] = [
     id: "INS-market-global",
     mode: "market",
     scope: "global",
-    title: "Market Insights",
+    title: "Global Insights",
     items: [
       {
-        text: "Harga jagung CBOT turun 22% YTD akibat panen raya Brasil dan Argentina. Harga lokal belum mengikuti — potensi arbitrase.",
+        text: "Harga jagung global melemah, tetapi transmisi ke pasar domestik tersendat oleh kurs dan biaya logistik; peluang arbitrase hanya efektif jika eksekusi procurement dipercepat sebelum window basis menutup.",
         type: "observation",
       },
       {
-        text: "Biaya freight Laut Merah naik 35% akibat konflik Yaman. Rute alternatif via Tanjung Harapan menambah waktu tempuh 12–14 hari.",
+        text: "Volatilitas rute pelayaran dan lead time impor meningkatkan risiko mismatch stok pakan; satu siklus keterlambatan kapal dapat menggerus service level dan memaksa pembelian spot berbiaya tinggi.",
+        type: "risk",
+        severity: "high",
+      },
+      {
+        text: "Pembukaan akses impor unggas di beberapa pasar ASEAN memberi ruang ekspansi untuk produk olahan; pemain dengan kepastian suplai dan sertifikasi lebih cepat menangkap pangsa awal.",
+        type: "opportunity",
+      },
+      {
+        text: "Naikkan porsi kontrak multi-origin dan kunci volume pada horizon 2–3 bulan untuk menurunkan eksposur terhadap shock geopolitik serta fluktuasi basis di origin tunggal.",
+        type: "recommendation",
+      },
+    ],
+    generatedAt: "2024-04-23T08:00:00",
+    confidence: "high",
+  },
+
+  // ─── MARKET NEWS INSIGHTS ────────────────────────────
+  {
+    id: "INS-market-news",
+    mode: "market",
+    scope: "local",
+    title: "News Insights",
+    items: [
+      {
+        text: "Sinyal cuaca ekstrem pada wilayah penghasil jagung memperbesar peluang gangguan pasokan musiman; antisipasi sekarang lebih murah daripada koreksi saat harga sudah bergerak.",
+        type: "observation",
+      },
+      {
+        text: "Narasi pelemahan daya beli di headline ekonomi berpotensi menekan sentimen belanja protein hewani menengah; risiko penurunan basket size muncul lebih dulu di kanal tradisional.",
         type: "risk",
         severity: "medium",
       },
       {
-        text: "Filipina buka kuota impor unggas baru — peluang ekspor produk olahan CPI ke pasar ASEAN senilai estimasi USD 45 juta.",
+        text: "Pemulihan mobilitas dan konsumsi luar rumah memberi sinyal penguatan demand pada channel food service; ini momentum untuk mendorong SKU dengan rotasi cepat.",
         type: "opportunity",
       },
       {
-        text: "Diversifikasi sumber impor jagung: tambah porsi Brasil (saat ini rendah) untuk kurangi ketergantungan pada Ukraina.",
+        text: "Jadikan radar berita harian sebagai trigger operasional: jika 2–3 sinyal negatif muncul beruntun, aktifkan skenario proteksi margin (procurement, pricing, dan alokasi channel) dalam minggu yang sama.",
         type: "recommendation",
       },
     ],
@@ -88,6 +117,35 @@ export const insights: InsightContent[] = [
     generatedAt: "2024-04-23T08:00:00",
     confidence: "high",
   },
+
+  // ─── DEMAND INSIGHTS — LOCAL ─────────────────────────────
+  {
+    id: "INS-demand-local",
+    mode: "supply",
+    scope: "local",
+    title: "Demand Insights",
+    items: [
+      {
+        text: "Pertumbuhan demand tidak merata: kota besar tumbuh lebih cepat dari area satelit, sehingga pola replenishment mingguan perlu dibedakan per klaster untuk mencegah stock mismatch.",
+        type: "observation",
+      },
+      {
+        text: "Risiko lost sales tertinggi muncul pada wilayah dengan fulfillment <95% selama dua minggu berturut; pola ini biasanya diikuti churn pelanggan prioritas dalam 1–2 siklus order.",
+        type: "risk",
+        severity: "high",
+      },
+      {
+        text: "Segmen HORECA dan modern trade menunjukkan potensi repeat order lebih stabil dibanding kanal tradisional, membuka ruang kontrak volume dengan visibilitas demand lebih baik.",
+        type: "opportunity",
+      },
+      {
+        text: "Terapkan demand shaping per kanal: alihkan alokasi lebih awal ke area dengan sinyal pull-through kuat, lalu lindungi SLA pelanggan tier atas saat terjadi lonjakan mendadak.",
+        type: "recommendation",
+      },
+    ],
+    generatedAt: "2024-04-23T08:00:00",
+    confidence: "high",
+  },
  
   // ─── SUPPLY INSIGHTS — GLOBAL ────────────────────────────
   {
@@ -111,6 +169,93 @@ export const insights: InsightContent[] = [
       },
       {
         text: "Tingkatkan proporsi kontrak jagung dari Brasil (saat ini <10% dari total impor) untuk mengimbangi risiko geopolitik Ukraina.",
+        type: "recommendation",
+      },
+    ],
+    generatedAt: "2024-04-23T08:00:00",
+    confidence: "medium",
+  },
+
+  // ─── DEMAND INSIGHTS — GLOBAL ────────────────────────────
+  {
+    id: "INS-demand-global",
+    mode: "supply",
+    scope: "global",
+    title: "Demand Insights",
+    items: [
+      {
+        text: "Permintaan protein hewani Asia Tenggara tetap resilien meski volatilitas harga bahan baku tinggi; ini menciptakan kebutuhan suplai yang konsisten untuk importir regional.",
+        type: "observation",
+      },
+      {
+        text: "Pelemahan mata uang di emerging markets dapat menekan daya serap impor dalam jangka pendek, meningkatkan risiko penundaan order dan koreksi forecast demand.",
+        type: "risk",
+        severity: "medium",
+      },
+      {
+        text: "Pasar yang sedang membuka akses impor unggas memberi peluang capture demand awal jika kesiapan volume dan kepastian pengiriman bisa dijaga.",
+        type: "opportunity",
+      },
+      {
+        text: "Bangun playbook demand sensing lintas negara: gabungkan sinyal harga, kurs, dan kebijakan impor untuk mempercepat keputusan alokasi volume ekspor/impor.",
+        type: "recommendation",
+      },
+    ],
+    generatedAt: "2024-04-23T08:00:00",
+    confidence: "medium",
+  },
+
+  // ─── SUPPLY-DEMAND NEWS INSIGHTS — LOCAL ─────────────────
+  {
+    id: "INS-supply-news-local",
+    mode: "supply",
+    scope: "local",
+    title: "News Insights",
+    items: [
+      {
+        text: "Hot news cuaca dan gangguan panen di wilayah sentra langsung berdampak ke ketersediaan bahan baku; lead indicator ini perlu diperlakukan sebagai early-warning supply.",
+        type: "observation",
+      },
+      {
+        text: "Pemberitaan tekanan harga pangan dan inflasi berpotensi mengubah pola belanja konsumen secara cepat, meningkatkan risiko forecast demand terlalu optimistis.",
+        type: "risk",
+        severity: "high",
+      },
+      {
+        text: "Berita pemulihan konsumsi luar rumah serta event musiman dapat menjadi katalis lonjakan demand jangka pendek pada SKU fast-moving.",
+        type: "opportunity",
+      },
+      {
+        text: "Gunakan news trigger harian untuk active rebalancing: saat muncul sinyal negatif beruntun, percepat pengamanan pasokan; saat sinyal demand menguat, percepat distribusi ke kanal prioritas.",
+        type: "recommendation",
+      },
+    ],
+    generatedAt: "2024-04-23T08:00:00",
+    confidence: "high",
+  },
+
+  // ─── SUPPLY-DEMAND NEWS INSIGHTS — GLOBAL ────────────────
+  {
+    id: "INS-supply-news-global",
+    mode: "supply",
+    scope: "global",
+    title: "News Insights",
+    items: [
+      {
+        text: "Headline geopolitik, cuaca ekstrem, dan disrupsi pelayaran tetap menjadi pemicu utama volatilitas pasokan global dalam horizon kuartalan.",
+        type: "observation",
+      },
+      {
+        text: "Kebijakan proteksionisme pangan lintas negara dapat mengubah arus perdagangan secara mendadak, memicu risiko kekosongan pasokan pada origin yang terlalu terkonsentrasi.",
+        type: "risk",
+        severity: "high",
+      },
+      {
+        text: "Berita pembukaan kuota impor atau relaksasi regulasi di pasar tujuan membuka peluang monetisasi cepat jika kesiapan volume dan sertifikasi sudah siap.",
+        type: "opportunity",
+      },
+      {
+        text: "Tetapkan dashboard hot-news global berbasis prioritas dampak untuk memicu keputusan cepat pada kontrak, jadwal pengiriman, dan alokasi volume lintas negara.",
         type: "recommendation",
       },
     ],
@@ -234,4 +379,3 @@ export const insights: InsightContent[] = [
     confidence: "medium",
   },
 ];
-

@@ -13,15 +13,32 @@ interface MapPanelProps {
 }
 
 const TABS: { label: string; value: SupplyTab }[] = [
-  { label: "Mitra", value: "mitra" },
-  { label: "Pelanggan", value: "pelanggan" },
+  { label: "Feed & Farm", value: "mitra" },
+  { label: "Food", value: "pelanggan" },
 ];
 
 const formatNumber = (value: number) => new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 }).format(value);
 const formatIdr = (value: number) =>
   `Rp ${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(value)}`;
+const formatMillionIdr = (value: number) =>
+  `Rp ${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 }).format(value)} juta`;
 
 const normalizeText = (value: string) => value.toLowerCase().trim();
+const ACTOR_LABEL: Record<"supplier" | "feedmill" | "farm", string> = {
+  supplier: "Supplier",
+  feedmill: "Feedmill",
+  farm: "Farm",
+};
+const CONNECTION_STATUS_LABEL: Record<"normal" | "watch" | "risk", string> = {
+  normal: "Efisien",
+  watch: "Perlu Monitor",
+  risk: "Risiko Tinggi",
+};
+const CONNECTION_STATUS_CLASS: Record<"normal" | "watch" | "risk", string> = {
+  normal: "bg-emerald-100 text-emerald-700",
+  watch: "bg-amber-100 text-amber-700",
+  risk: "bg-red-100 text-red-700",
+};
 
 const getRecommendedSource = (selection: MapSelection, perspective: SupplyTab) => {
   if (selection.scope === "local") {
@@ -214,27 +231,182 @@ const MapPanel = ({
       )}
 
       {selection && (
-        <div className="pointer-events-none absolute left-4 top-20 bottom-[15.75rem] z-20 w-[260px] max-w-[calc(100%-2rem)]">
+        <div className="pointer-events-none absolute left-4 top-20 bottom-[15.75rem] z-20 w-[300px] max-w-[calc(100%-2rem)]">
           <div className="pointer-events-auto flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-xl backdrop-blur">
             <div className="flex items-start justify-between gap-2 border-b border-border px-4 py-3">
               <div>
                 <h3 className="text-sm font-semibold text-foreground">{selection.name}</h3>
-                <p className="text-xs text-muted-foreground">
-                  {selection.metricLabel}: {selection.metricValue.toFixed(1)}
-                </p>
-                {selection.district?.provinceName && (
+                {selection.actor ? (
+                  <>
+                    <p className="text-xs text-muted-foreground">
+                      {ACTOR_LABEL[selection.actor.type]} • {selection.actor.districtName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{selection.actor.provinceName}</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {selection.metricLabel}: {selection.metricValue.toFixed(1)}
+                  </p>
+                )}
+                {selection.district?.provinceName && !selection.actor && (
                   <p className="text-xs text-muted-foreground">
                     {selection.district.provinceName}
                   </p>
                 )}
+                {selection.districtSupply?.provinceName && !selection.actor && (
+                  <p className="text-xs text-muted-foreground">
+                    {selection.districtSupply.provinceName}
+                  </p>
+                )}
               </div>
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground">
-                {dashboardMode === "market" ? "Market" : `Supply • ${supplyPerspective === "mitra" ? "Mitra" : "Pelanggan"}`}
-              </span>
+              <div className="flex items-start gap-1">
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground">
+                  {selection.actor
+                    ? `${ACTOR_LABEL[selection.actor.type]} Node`
+                    : dashboardMode === "market"
+                      ? "Market"
+                      : `${supplyPerspective === "mitra" ? "Feed & Farm" : "Food"}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelection(null)}
+                  className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  aria-label="Close detail info"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
-            {dashboardMode === "market" ? (
+            {selection.actor ? (
+              <div className="space-y-3 text-xs text-foreground/90">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="rounded-md border border-border bg-background/70 p-2">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Total Inbound</p>
+                    <p className="mt-1 text-[12px] font-semibold text-foreground">
+                      {formatNumber(selection.actor.inboundSummary.totalTonPerMonth)} ton/bulan
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {formatMillionIdr(selection.actor.inboundSummary.totalCostMillionIdr)}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-border bg-background/70 p-2">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Total Outbound</p>
+                    <p className="mt-1 text-[12px] font-semibold text-foreground">
+                      {formatNumber(selection.actor.outboundSummary.totalTonPerMonth)} ton/bulan
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {formatMillionIdr(selection.actor.outboundSummary.totalCostMillionIdr)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-md border border-border bg-background/70 p-2">
+                  <p className="text-[11px] font-semibold text-foreground">Koneksi Masuk</p>
+                  {selection.actor.inbound.length > 0 ? (
+                    <ul className="mt-1 space-y-1">
+                      {selection.actor.inbound.map((node) => (
+                        <li key={node.id} className="rounded-md border border-border/70 bg-card/60 px-2 py-1.5 text-[11px]">
+                          <p className="font-medium text-foreground">
+                            {ACTOR_LABEL[node.type]} • {node.districtName}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">{node.provinceName}</p>
+                          <span
+                            className={[
+                              "mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+                              CONNECTION_STATUS_CLASS[node.healthStatus],
+                            ].join(" ")}
+                          >
+                            {CONNECTION_STATUS_LABEL[node.healthStatus]}
+                          </span>
+                          <p className="mt-1 text-muted-foreground">
+                            Tonase: {formatNumber(node.tonPerMonth)} ton/bulan
+                          </p>
+                          <p className="text-muted-foreground">
+                            Cost: {formatIdr(node.costPerKg)}/kg • {formatMillionIdr(node.totalCostMillionIdr)}
+                          </p>
+                          <p className="text-muted-foreground">
+                            Jarak: {formatNumber(node.distanceKm)} km
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-muted-foreground">Tidak ada koneksi masuk.</p>
+                  )}
+                </div>
+                <div className="rounded-md border border-border bg-background/70 p-2">
+                  <p className="text-[11px] font-semibold text-foreground">Koneksi Keluar</p>
+                  {selection.actor.outbound.length > 0 ? (
+                    <ul className="mt-1 space-y-1">
+                      {selection.actor.outbound.map((node) => (
+                        <li key={node.id} className="rounded-md border border-border/70 bg-card/60 px-2 py-1.5 text-[11px]">
+                          <p className="font-medium text-foreground">
+                            {ACTOR_LABEL[node.type]} • {node.districtName}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">{node.provinceName}</p>
+                          <span
+                            className={[
+                              "mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+                              CONNECTION_STATUS_CLASS[node.healthStatus],
+                            ].join(" ")}
+                          >
+                            {CONNECTION_STATUS_LABEL[node.healthStatus]}
+                          </span>
+                          <p className="mt-1 text-muted-foreground">
+                            Tonase: {formatNumber(node.tonPerMonth)} ton/bulan
+                          </p>
+                          <p className="text-muted-foreground">
+                            Cost: {formatIdr(node.costPerKg)}/kg • {formatMillionIdr(node.totalCostMillionIdr)}
+                          </p>
+                          <p className="text-muted-foreground">
+                            Jarak: {formatNumber(node.distanceKm)} km
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-muted-foreground">Tidak ada koneksi keluar.</p>
+                  )}
+                </div>
+
+                {(() => {
+                  const flaggedRoutes = [...selection.actor.inbound, ...selection.actor.outbound]
+                    .filter((item) => item.healthStatus !== "normal")
+                    .sort((a, b) => (a.healthStatus === b.healthStatus ? b.costPerKg - a.costPerKg : a.healthStatus === "risk" ? -1 : 1))
+                    .slice(0, 3);
+
+                  if (flaggedRoutes.length === 0) {
+                    return (
+                      <div className="rounded-md border border-emerald-200 bg-emerald-50 p-2">
+                        <p className="text-[11px] font-semibold text-emerald-700">Analisa & Rekomendasi</p>
+                        <p className="mt-1 text-[11px] text-emerald-700">
+                          Tidak ada rute kritikal pada node ini. Pertahankan pola distribusi saat ini dan monitor SLA mingguan.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="rounded-md border border-border bg-background/70 p-2">
+                      <p className="text-[11px] font-semibold text-foreground">Analisa & Rekomendasi</p>
+                      <ul className="mt-1 space-y-1.5">
+                        {flaggedRoutes.map((route) => (
+                          <li key={`${route.id}-${route.healthStatus}`} className="rounded-md border border-border/70 bg-card/60 px-2 py-1">
+                            <p className="text-[11px] font-medium text-foreground">
+                              {ACTOR_LABEL[route.type]} • {route.districtName} ({CONNECTION_STATUS_LABEL[route.healthStatus]})
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">{route.issue}</p>
+                            <p className="text-[10px] text-foreground/85">{route.recommendation}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : dashboardMode === "market" ? (
               <div className="space-y-1.5 text-xs text-foreground/90">
                 {selection.region ? (
                   <>
@@ -280,7 +452,24 @@ const MapPanel = ({
               </div>
             ) : (
               <div className="space-y-1.5 text-xs text-foreground/90">
-                {selection.region ? (
+                {selection.scope === "local" && selection.districtSupply ? (
+                  <>
+                    <p>Supply: {formatNumber(selection.districtSupply.supply.suppliesVolumeTon)} ton</p>
+                    <p>Demand: {formatNumber(selection.districtSupply.supply.salesVolumeTon)} ton</p>
+                    <p>
+                      {selection.districtSupply.supply.surplusShortage >= 0 ? "Surplus" : "Shortage"}: {selection.districtSupply.supply.surplusShortage >= 0 ? "+" : ""}
+                      {formatNumber(selection.districtSupply.supply.surplusShortage)} ton
+                    </p>
+                    <p>Supply Index: {selection.districtSupply.supply.supplyIndex}</p>
+                    <p>Demand Index: {selection.districtSupply.supply.demandIndex}</p>
+                    <p>
+                      Recommended Source: {recommendedSource?.source ?? "Belum tersedia"}
+                    </p>
+                    <p>
+                      Est. Logistics Cost: {recommendedSource ? formatIdr(recommendedSource.estimatedLogisticsCost) : "-"} /kg
+                    </p>
+                  </>
+                ) : selection.region ? (
                   <>
                     <p>Supply: {formatNumber(selection.region.supply.suppliesVolumeTon)} ton</p>
                     <p>Demand: {formatNumber(selection.region.supply.salesVolumeTon)} ton</p>
@@ -316,7 +505,7 @@ const MapPanel = ({
               </div>
             )}
 
-            {relatedSignals.length > 0 && (
+            {relatedSignals.length > 0 && !selection.actor && (
               <div className="border-t border-border pt-2">
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Risk Signals
