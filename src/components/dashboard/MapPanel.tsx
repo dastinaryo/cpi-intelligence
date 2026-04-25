@@ -24,19 +24,19 @@ const formatMillionIdr = (value: number) =>
   `Rp ${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 }).format(value)} juta`;
 
 const normalizeText = (value: string) => value.toLowerCase().trim();
-const ACTOR_LABEL: Record<"supplier" | "feedmill" | "farm", string> = {
+const ACTOR_LABEL: Record<"supplier" | "feedmill" | "farm" | "distributor" | "retail", string> = {
   supplier: "Supplier",
   feedmill: "Feedmill",
   farm: "Farm",
+  distributor: "Distributor",
+  retail: "Retail",
 };
-const CONNECTION_STATUS_LABEL: Record<"normal" | "watch" | "risk", string> = {
-  normal: "Efisien",
-  watch: "Perlu Monitor",
+const CONNECTION_STATUS_LABEL: Record<"normal" | "risk", string> = {
+  normal: "Normal",
   risk: "Risiko Tinggi",
 };
-const CONNECTION_STATUS_CLASS: Record<"normal" | "watch" | "risk", string> = {
-  normal: "bg-emerald-100 text-emerald-700",
-  watch: "bg-amber-100 text-amber-700",
+const CONNECTION_STATUS_CLASS: Record<"normal" | "risk", string> = {
+  normal: "border border-slate-300 bg-slate-50 text-slate-700",
   risk: "bg-red-100 text-red-700",
 };
 
@@ -329,6 +329,11 @@ const MapPanel = ({
                           <p className="text-muted-foreground">
                             Jarak: {formatNumber(node.distanceKm)} km
                           </p>
+                          {node.healthStatus === "risk" && node.recommendedNodeName && (
+                            <p className="text-emerald-700">
+                              Rute rekomendasi: {node.recommendedNodeName}
+                            </p>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -363,6 +368,11 @@ const MapPanel = ({
                           <p className="text-muted-foreground">
                             Jarak: {formatNumber(node.distanceKm)} km
                           </p>
+                          {node.healthStatus === "risk" && node.recommendedNodeName && (
+                            <p className="text-emerald-700">
+                              Rute rekomendasi: {node.recommendedNodeName}
+                            </p>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -398,6 +408,11 @@ const MapPanel = ({
                               {ACTOR_LABEL[route.type]} • {route.districtName} ({CONNECTION_STATUS_LABEL[route.healthStatus]})
                             </p>
                             <p className="text-[10px] text-muted-foreground">{route.issue}</p>
+                            {route.recommendedNodeName && (
+                              <p className="text-[10px] text-emerald-700">
+                                Rute rekomendasi: {route.recommendedNodeName}
+                              </p>
+                            )}
                             <p className="text-[10px] text-foreground/85">{route.recommendation}</p>
                           </li>
                         ))}

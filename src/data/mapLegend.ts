@@ -60,7 +60,7 @@ export const legendConfigs: LegendConfig[] = [
     metricLabel: "Indeks Supply Global",
     unit: "0–100",
     description: "Mencerminkan kemampuan ekspor bersih per negara. Nilai tinggi = eksportir besar, nilai rendah = importir besar.",
-    stops: BLUE_STOPS,
+    stops: SUPPLY_STOPS,
   },
 ];
  

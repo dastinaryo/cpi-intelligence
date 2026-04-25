@@ -13,10 +13,7 @@ const Index = () => {
   const [supplyPerspective, setSupplyPerspective] = useState<SupplyTab>("mitra");
   const [competitorTicker, setCompetitorTicker] = useState<StockTicker>("JPFA");
   const [insightsVisible, setInsightsVisible] = useState(false);
-  const shouldUseWideIndicatorOffset =
-    dashboardMode === "supply" &&
-    commodityScope === "local" &&
-    supplyPerspective === "mitra";
+  const shouldUseWideIndicatorOffset = dashboardMode === "supply";
   const insightsLeftOffset = shouldUseWideIndicatorOffset ? "left-[23.25rem]" : "left-[14.75rem]";
 
   const insightMap = useMemo(() => {

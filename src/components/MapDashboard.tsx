@@ -166,8 +166,41 @@ const getMetricLabel = (
   return perspective === "mitra" ? "Mitra Supply Score" : "Customer Service Score";
 };
 
-type SupplyActorType = "supplier" | "feedmill" | "farm";
+type SupplyActorType = "supplier" | "feedmill" | "farm" | "distributor" | "retail";
 type ConnectionHealth = "normal" | "risk";
+
+interface RouteProfile {
+  tonBase: number;
+  tonVariance: number;
+  baseCostPerKg: number;
+  distanceFactor: number;
+}
+
+type ActorRouteProfile = Record<string, RouteProfile>;
+
+interface ActorNetworkConfigLocal {
+  stageOneType: SupplyActorType;
+  stageTwoType: SupplyActorType;
+  stageThreeType: SupplyActorType;
+  stageOneInputs: ActorLocationInput[];
+  stageTwoInputs: ActorLocationInput[];
+  stageThreeInputs: ActorLocationInput[];
+  routeProfile: ActorRouteProfile;
+  stageOnePreferredCount: number;
+  stageTwoPreferredCount: number;
+}
+
+interface ActorNetworkConfigGlobal {
+  stageOneType: SupplyActorType;
+  stageTwoType: SupplyActorType;
+  stageThreeType: SupplyActorType;
+  stageOneInputs: GlobalActorLocationInput[];
+  stageTwoInputs: GlobalActorLocationInput[];
+  stageThreeInputs: GlobalActorLocationInput[];
+  routeProfile: ActorRouteProfile;
+  stageOnePreferredCount: number;
+  stageTwoPreferredCount: number;
+}
 
 interface SupplyActorNode {
   id: string;
@@ -215,21 +248,41 @@ interface SupplyActorConnection {
   totalCostMillionIdr: number;
   healthStatus: ConnectionHealth;
   healthColor: string;
-  recommendedToId?: string;
+  recommendedFromId?: string;
   issue: string;
   recommendation: string;
 }
 
+interface ActorRouteSelection {
+  id: string;
+  type: SupplyActorType;
+  districtName: string;
+  provinceName: string;
+  tonPerMonth: number;
+  costPerKg: number;
+  totalCostMillionIdr: number;
+  distanceKm: number;
+  healthStatus: ConnectionHealth;
+  healthColor: string;
+  issue: string;
+  recommendation: string;
+  recommendedNodeName?: string;
+}
+
 const ACTOR_STYLE: Record<SupplyActorType, { label: string; color: string; stage: number; icon: string }> = {
-  supplier: { label: "Supplier", color: "#1d4ed8", stage: 1, icon: "🚚" },
+  supplier: { label: "Supplier", color: "#2563eb", stage: 1, icon: "🚚" },
   feedmill: { label: "Feedmill", color: "#7c3aed", stage: 2, icon: "🏭" },
   farm: { label: "Farm", color: "#059669", stage: 3, icon: "🐔" },
+  distributor: { label: "Distributor", color: "#d97706", stage: 2, icon: "📦" },
+  retail: { label: "Retail", color: "#0f766e", stage: 3, icon: "🛒" },
 };
 
 const ACTOR_COORDINATE_OFFSET: Record<SupplyActorType, [number, number]> = {
   supplier: [-0.2, 0.14],
   feedmill: [0, -0.2],
   farm: [0.2, 0.14],
+  distributor: [0, -0.2],
+  retail: [0.2, 0.14],
 };
 
 const applyActorCoordinateOffset = (
@@ -275,6 +328,29 @@ const FARM_LOCATIONS: ActorLocationInput[] = [
   { name: "Deli Serdang" },
 ];
 
+const DISTRIBUTOR_LOCATIONS: ActorLocationInput[] = [
+  { name: "Jakarta Utara" },
+  { name: "Bekasi" },
+  { name: "Semarang" },
+  { name: "Surabaya" },
+  { name: "Makassar" },
+  { name: "Tangerang" },
+  { name: "Pekanbaru" },
+  { name: "Sidoarjo" },
+];
+
+const RETAIL_LOCATIONS: ActorLocationInput[] = [
+  { name: "Jakarta Pusat" },
+  { name: "Bandung" },
+  { name: "Semarang" },
+  { name: "Surabaya" },
+  { name: "Medan" },
+  { name: "Denpasar" },
+  { name: "Makassar" },
+  { name: "Tangerang Selatan" },
+  { name: "Jayapura" },
+];
+
 const SUPPLIER_GLOBAL_LOCATIONS: GlobalActorLocationInput[] = [
   { countryCode: "BRA" },
   { countryCode: "ARG" },
@@ -307,6 +383,29 @@ const FARM_GLOBAL_LOCATIONS: GlobalActorLocationInput[] = [
   { countryCode: "ZAF" },
 ];
 
+const DISTRIBUTOR_GLOBAL_LOCATIONS: GlobalActorLocationInput[] = [
+  { countryCode: "IDN" },
+  { countryCode: "SGP" },
+  { countryCode: "MYS" },
+  { countryCode: "PHL" },
+  { countryCode: "VNM" },
+  { countryCode: "JPN" },
+  { countryCode: "SAU" },
+  { countryCode: "KOR" },
+];
+
+const RETAIL_GLOBAL_LOCATIONS: GlobalActorLocationInput[] = [
+  { countryCode: "IDN" },
+  { countryCode: "JPN" },
+  { countryCode: "PHL" },
+  { countryCode: "VNM" },
+  { countryCode: "MYS" },
+  { countryCode: "SGP" },
+  { countryCode: "SAU" },
+  { countryCode: "KOR" },
+  { countryCode: "CHN" },
+];
+
 const cleanLocationToken = (value: string) =>
   normalize(value)
     .replace(/^(KABUPATEN|KOTA|KOTA_ADM|KOTA_ADMINISTRASI)_+/, "")
@@ -325,7 +424,7 @@ const toFeatureCoordinate = (geometry: GeoJSON.Geometry | null | undefined): [nu
     value.forEach((child) => walk(child));
   };
 
-  walk((geometry as GeoJSON.Geometry).coordinates);
+  walk((geometry as GeoJSON.Geometry & { coordinates?: unknown }).coordinates);
   if (positions.length === 0) return null;
 
   let minX = positions[0][0];
@@ -370,7 +469,7 @@ const CONNECTION_HEALTH_STYLE: Record<
   ConnectionHealth,
   { label: string; color: string }
 > = {
-  normal: { label: "Normal", color: "#111827" },
+  normal: { label: "Normal", color: "#ffffff" },
   risk: { label: "Risiko Tinggi", color: "#dc2626" },
 };
 
@@ -394,80 +493,199 @@ const formatAltNodeNames = (names: string[]) => {
 const getConnectionEfficiencyScore = (connection: SupplyActorConnection) =>
   connection.costPerKg + connection.distanceKm * 1.2;
 
+const getRouteProfile = (
+  fromType: SupplyActorType,
+  toType: SupplyActorType,
+  routeProfile: ActorRouteProfile,
+) => routeProfile[`${fromType}->${toType}`];
+
+const createActorConnection = (
+  fromNode: SupplyActorNode,
+  toNode: SupplyActorNode,
+  routeProfile: ActorRouteProfile,
+): SupplyActorConnection => {
+  const key = `${fromNode.id}->${toNode.id}`;
+  const routeDistance = distanceKm(fromNode.coordinate, toNode.coordinate);
+  const routeSeed = hashString(key);
+  const profile = getRouteProfile(fromNode.type, toNode.type, routeProfile);
+  if (!profile) {
+    throw new Error(`Missing route profile for ${fromNode.type}->${toNode.type}`);
+  }
+  const tonPerMonth = profile.tonBase + (routeSeed % profile.tonVariance);
+  const costPerKg = Math.round(profile.baseCostPerKg + routeDistance * profile.distanceFactor);
+  const totalCostMillionIdr = Number(((tonPerMonth * 1000 * costPerKg) / 1_000_000).toFixed(1));
+
+  return {
+    id: key,
+    fromId: fromNode.id,
+    toId: toNode.id,
+    fromType: fromNode.type,
+    toType: toNode.type,
+    distanceKm: Number(routeDistance.toFixed(1)),
+    tonPerMonth,
+    costPerKg,
+    totalCostMillionIdr,
+    healthStatus: "normal",
+    healthColor: CONNECTION_HEALTH_STYLE.normal.color,
+    issue: "",
+    recommendation: "",
+  };
+};
+
 const evaluateConnectionPortfolio = (
-  rawConnections: SupplyActorConnection[],
+  activeConnections: SupplyActorConnection[],
+  candidateConnections: SupplyActorConnection[],
   actorById: Map<string, SupplyActorNode>,
 ) =>
-  rawConnections.map((connection) => {
-    const sameStageOptions = rawConnections.filter(
-      (candidate) =>
-        candidate.fromId === connection.fromId &&
-        candidate.toType === connection.toType &&
-        candidate.id !== connection.id,
-    );
+  (() => {
+    const evaluatedById = new Map<string, SupplyActorConnection>();
+    const groupedActiveConnections = new Map<string, SupplyActorConnection[]>();
 
-    if (sameStageOptions.length === 0) {
-      return {
-        ...connection,
-        healthStatus: "normal" as ConnectionHealth,
-        healthColor: CONNECTION_HEALTH_STYLE.normal.color,
-        issue: "Rute ini belum punya alternatif langsung pada tahap distribusi yang sama.",
-        recommendation: "Pertahankan rute saat ini dan bangun opsi node cadangan untuk mitigasi gangguan.",
-      };
-    }
-
-    const currentScore = getConnectionEfficiencyScore(connection);
-    const sortedAlternatives = [...sameStageOptions].sort(
-      (a, b) => getConnectionEfficiencyScore(a) - getConnectionEfficiencyScore(b),
-    );
-    const optionScores = [currentScore, ...sameStageOptions.map(getConnectionEfficiencyScore)].sort((a, b) => a - b);
-    const bestAlternative = sortedAlternatives[0];
-    const bestAlternativeScore = getConnectionEfficiencyScore(bestAlternative);
-    const worstScore = optionScores[optionScores.length - 1];
-
-    const strongerAlternatives = sortedAlternatives.filter((candidate) => {
-      const scoreGapRatio = (currentScore - getConnectionEfficiencyScore(candidate)) / Math.max(currentScore, 1);
-      const costGap = connection.costPerKg - candidate.costPerKg;
-      const distanceGap = connection.distanceKm - candidate.distanceKm;
-      return scoreGapRatio >= 0.12 && (costGap >= 140 || distanceGap >= 180);
+    activeConnections.forEach((connection) => {
+      const groupKey = `${connection.toId}:${connection.fromType}`;
+      const group = groupedActiveConnections.get(groupKey) ?? [];
+      group.push(connection);
+      groupedActiveConnections.set(groupKey, group);
     });
 
-    const strongestGapRatio = (currentScore - bestAlternativeScore) / Math.max(currentScore, 1);
-    const isWorstOption = currentScore >= worstScore - 0.0001;
-    const healthStatus: ConnectionHealth =
-      (strongerAlternatives.length >= 1 && strongestGapRatio >= 0.1) ||
-      (isWorstOption && strongestGapRatio >= 0.16)
-        ? "risk"
-        : "normal";
+    groupedActiveConnections.forEach((group) => {
+      const sampleConnection = group[0];
+      const targetNodeName = actorById.get(sampleConnection.toId)?.districtName ?? "node tujuan";
+      const actorLabel = ACTOR_STYLE[sampleConnection.fromType].label.toLowerCase();
+      const sameStageOptions = candidateConnections.filter(
+        (candidate) =>
+          candidate.toId === sampleConnection.toId &&
+          candidate.fromType === sampleConnection.fromType,
+      );
 
-    const topAlternativeNames = strongerAlternatives
-      .slice(0, 2)
-      .map((candidate) => actorById.get(candidate.toId)?.districtName)
-      .filter((name): name is string => Boolean(name));
+      if (sameStageOptions.length <= 1) {
+        group.forEach((connection) => {
+          evaluatedById.set(connection.id, {
+            ...connection,
+            healthStatus: "normal",
+            healthColor: CONNECTION_HEALTH_STYLE.normal.color,
+            recommendedFromId: undefined,
+            issue: "Node tujuan ini belum punya alternatif aktor lain pada tahap suplai yang sama.",
+            recommendation: "Pertahankan koneksi saat ini sambil menyiapkan opsi aktor cadangan untuk mitigasi gangguan.",
+          });
+        });
+        return;
+      }
 
-    const bestAltNode = actorById.get(bestAlternative.toId);
-    const bestAltName = bestAltNode?.districtName ?? "node alternatif";
-    const altLabel = formatAltNodeNames(topAlternativeNames);
+      const connectionCandidates = group
+        .map((connection) => {
+          const dominatingAlternatives = sameStageOptions
+            .filter(
+              (candidate) =>
+                candidate.id !== connection.id &&
+                candidate.costPerKg <= connection.costPerKg &&
+                candidate.distanceKm <= connection.distanceKm &&
+                (candidate.costPerKg < connection.costPerKg || candidate.distanceKm < connection.distanceKm),
+            )
+            .sort((a, b) => getConnectionEfficiencyScore(a) - getConnectionEfficiencyScore(b));
 
-    const issue =
-      healthStatus === "risk"
-        ? `Ada alternatif lebih efisien (${altLabel || bestAltName}); rute saat ini menambah biaya/lead time secara signifikan.`
-        : "Rute ini masih kompetitif dibanding opsi alternatif yang tersedia dari node asal yang sama.";
+          if (dominatingAlternatives.length === 0) {
+            return null;
+          }
 
-    const recommendation =
-      healthStatus === "risk"
-        ? `Alihkan volume bertahap ke ${altLabel || bestAltName} dan pertahankan rute ini hanya sebagai backup.`
-        : "Pertahankan rute saat ini. Lakukan review alternatif mingguan untuk menjaga efisiensi.";
+          const bestAlternative = dominatingAlternatives[0];
+          const currentScore = getConnectionEfficiencyScore(connection);
+          const bestAlternativeScore = getConnectionEfficiencyScore(bestAlternative);
 
+          return {
+            connection,
+            bestAlternative,
+            dominatingAlternatives,
+            scoreGap: currentScore - bestAlternativeScore,
+            currentScore,
+          };
+        })
+        .filter(Boolean) as Array<{
+        connection: SupplyActorConnection;
+        bestAlternative: SupplyActorConnection;
+        dominatingAlternatives: SupplyActorConnection[];
+        scoreGap: number;
+        currentScore: number;
+      }>;
+
+      const primaryRisk = [...connectionCandidates].sort((a, b) => {
+        if (b.scoreGap !== a.scoreGap) return b.scoreGap - a.scoreGap;
+        return b.currentScore - a.currentScore;
+      })[0];
+
+      group.forEach((connection) => {
+        if (!primaryRisk || connection.id !== primaryRisk.connection.id) {
+          evaluatedById.set(connection.id, {
+            ...connection,
+            healthStatus: "normal",
+            healthColor: CONNECTION_HEALTH_STYLE.normal.color,
+            recommendedFromId: undefined,
+            issue: `${targetNodeName} tidak memiliki prioritas reroute pada koneksi ini saat ini.`,
+            recommendation: primaryRisk
+              ? `Prioritas perbaikan untuk ${targetNodeName} saat ini difokuskan pada satu koneksi yang paling tidak optimal.`
+              : `${targetNodeName} belum memiliki alternatif ${actorLabel} yang sekaligus lebih murah dan lebih dekat.`,
+          });
+          return;
+        }
+
+        const topAlternativeNames = primaryRisk.dominatingAlternatives
+          .slice(0, 2)
+          .map((candidate) => actorById.get(candidate.fromId)?.districtName)
+          .filter((name): name is string => Boolean(name));
+        const bestAltNode = actorById.get(primaryRisk.bestAlternative.fromId);
+        const bestAltName = bestAltNode?.districtName ?? "node alternatif";
+        const altLabel = formatAltNodeNames(topAlternativeNames);
+
+        evaluatedById.set(connection.id, {
+          ...connection,
+          healthStatus: "risk",
+          healthColor: CONNECTION_HEALTH_STYLE.risk.color,
+          recommendedFromId: primaryRisk.bestAlternative.fromId,
+          issue: `${targetNodeName} punya alternatif ${actorLabel} yang lebih efisien pada cost dan jarak (${altLabel || bestAltName}); koneksi ini adalah yang paling tidak optimal dan menjadi prioritas perbaikan.`,
+          recommendation: `Gunakan ${altLabel || bestAltName} sebagai ${actorLabel} rekomendasi untuk ${targetNodeName}, lalu jadikan koneksi saat ini sebagai backup bila diperlukan.`,
+        });
+      });
+    });
+
+    return activeConnections.map((connection) => evaluatedById.get(connection.id) ?? connection);
+  })();
+
+const getNodeHealthMap = (
+  nodes: SupplyActorNode[],
+  evaluatedConnections: SupplyActorConnection[],
+) => {
+  const nodeHealth = new Map<string, ConnectionHealth>(
+    nodes.map((node) => [node.id, "normal" as ConnectionHealth]),
+  );
+
+  evaluatedConnections.forEach((connection) => {
+    const fromHealth = nodeHealth.get(connection.fromId) ?? "normal";
+    const toHealth = nodeHealth.get(connection.toId) ?? "normal";
+    if (CONNECTION_HEALTH_PRIORITY[connection.healthStatus] > CONNECTION_HEALTH_PRIORITY[fromHealth]) {
+      nodeHealth.set(connection.fromId, connection.healthStatus);
+    }
+    if (CONNECTION_HEALTH_PRIORITY[connection.healthStatus] > CONNECTION_HEALTH_PRIORITY[toHealth]) {
+      nodeHealth.set(connection.toId, connection.healthStatus);
+    }
+  });
+
+  return nodeHealth;
+};
+
+const enrichNodesWithHealth = (
+  nodes: SupplyActorNode[],
+  evaluatedConnections: SupplyActorConnection[],
+) => {
+  const nodeHealth = getNodeHealthMap(nodes, evaluatedConnections);
+  return nodes.map((node) => {
+    const healthStatus = nodeHealth.get(node.id) ?? "normal";
     return {
-      ...connection,
+      ...node,
       healthStatus,
-      healthColor: CONNECTION_HEALTH_STYLE[healthStatus].color,
-      recommendedToId: healthStatus === "risk" ? bestAlternative.toId : undefined,
-      issue,
-      recommendation,
+      healthColor: NODE_INDICATOR_COLOR[healthStatus],
     };
   });
+};
 
 const getNearestNodes = (
   source: SupplyActorNode,
@@ -478,8 +696,52 @@ const getNearestNodes = (
     .sort((a, b) => distanceKm(source.coordinate, a.coordinate) - distanceKm(source.coordinate, b.coordinate))
     .slice(0, count);
 
-const buildSupplyActorNetwork = (
+const connectActorStage = ({
+  sources,
+  targets,
+  preferredCount,
+  addConnection,
+  getConnections,
+}: {
+  sources: SupplyActorNode[];
+  targets: SupplyActorNode[];
+  preferredCount: number;
+  addConnection: (fromNode: SupplyActorNode, toNode: SupplyActorNode) => void;
+  getConnections: () => SupplyActorConnection[];
+}) => {
+  if (sources.length === 0 || targets.length === 0) return;
+
+  const targetCount = Math.min(preferredCount, targets.length);
+  sources.forEach((source) => {
+    getNearestNodes(source, targets, targetCount).forEach((target) => addConnection(source, target));
+  });
+
+  const getStageCoverage = () => {
+    const stageConnections = getConnections();
+    return {
+      coveredSourceIds: new Set(stageConnections.map((connection) => connection.fromId)),
+      coveredTargetIds: new Set(stageConnections.map((connection) => connection.toId)),
+    };
+  };
+
+  const { coveredTargetIds } = getStageCoverage();
+  targets
+    .filter((target) => !coveredTargetIds.has(target.id))
+    .forEach((target) => {
+      getNearestNodes(target, sources, 1).forEach((source) => addConnection(source, target));
+    });
+
+  const { coveredSourceIds } = getStageCoverage();
+  sources
+    .filter((source) => !coveredSourceIds.has(source.id))
+    .forEach((source) => {
+      getNearestNodes(source, targets, 1).forEach((target) => addConnection(source, target));
+    });
+};
+
+const buildLocalActorNetwork = (
   geojson: GeoJSON.FeatureCollection,
+  config: ActorNetworkConfigLocal,
 ): { nodes: SupplyActorNode[]; connections: SupplyActorConnection[] } => {
   const locationIndex = new Map<string, ActorLocationCandidate[]>();
   const pushLocationIndex = (key: string, candidate: ActorLocationCandidate) => {
@@ -544,84 +806,60 @@ const buildSupplyActorNetwork = (
       })
       .filter((node): node is SupplyActorNode => Boolean(node));
 
-  const suppliers = mapActorNodes("supplier", SUPPLIER_LOCATIONS);
-  const feedmills = mapActorNodes("feedmill", FEEDMILL_LOCATIONS);
-  const farms = mapActorNodes("farm", FARM_LOCATIONS);
+  const stageOneNodes = mapActorNodes(config.stageOneType, config.stageOneInputs);
+  const stageTwoNodes = mapActorNodes(config.stageTwoType, config.stageTwoInputs);
+  const stageThreeNodes = mapActorNodes(config.stageThreeType, config.stageThreeInputs);
 
-  const connections: SupplyActorConnection[] = [];
+  const activeConnections: SupplyActorConnection[] = [];
   const connectionSet = new Set<string>();
   const addConnection = (fromNode: SupplyActorNode, toNode: SupplyActorNode) => {
     const key = `${fromNode.id}->${toNode.id}`;
     if (connectionSet.has(key)) return;
     connectionSet.add(key);
-    const routeDistance = distanceKm(fromNode.coordinate, toNode.coordinate);
-    const routeSeed = hashString(key);
-    const isSupplierToFeedmill = fromNode.type === "supplier" && toNode.type === "feedmill";
-    const tonPerMonth = isSupplierToFeedmill
-      ? 140 + (routeSeed % 120)
-      : 60 + (routeSeed % 90);
-    const baseCostPerKg = isSupplierToFeedmill ? 220 : 350;
-    const distanceFactor = isSupplierToFeedmill ? 3.2 : 4.5;
-    const costPerKg = Math.round(baseCostPerKg + routeDistance * distanceFactor);
-    const totalCostMillionIdr = Number(((tonPerMonth * 1000 * costPerKg) / 1_000_000).toFixed(1));
-
-    connections.push({
-      id: key,
-      fromId: fromNode.id,
-      toId: toNode.id,
-      fromType: fromNode.type,
-      toType: toNode.type,
-      distanceKm: Number(routeDistance.toFixed(1)),
-      tonPerMonth,
-      costPerKg,
-      totalCostMillionIdr,
-      healthStatus: "normal",
-      healthColor: CONNECTION_HEALTH_STYLE.normal.color,
-      issue: "",
-      recommendation: "",
-    });
+    activeConnections.push(createActorConnection(fromNode, toNode, config.routeProfile));
   };
 
-  suppliers.forEach((supplier) => {
-    getNearestNodes(supplier, feedmills, 2).forEach((feedmill) => addConnection(supplier, feedmill));
+  connectActorStage({
+    sources: stageOneNodes,
+    targets: stageTwoNodes,
+    preferredCount: config.stageOnePreferredCount,
+    addConnection,
+    getConnections: () =>
+      activeConnections.filter(
+        (connection) => connection.fromType === config.stageOneType && connection.toType === config.stageTwoType,
+      ),
   });
 
-  feedmills.forEach((feedmill) => {
-    getNearestNodes(feedmill, farms, 3).forEach((farm) => addConnection(feedmill, farm));
+  connectActorStage({
+    sources: stageTwoNodes,
+    targets: stageThreeNodes,
+    preferredCount: config.stageTwoPreferredCount,
+    addConnection,
+    getConnections: () =>
+      activeConnections.filter(
+        (connection) => connection.fromType === config.stageTwoType && connection.toType === config.stageThreeType,
+      ),
   });
 
-  const nodes = [...suppliers, ...feedmills, ...farms];
+  const nodes = [...stageOneNodes, ...stageTwoNodes, ...stageThreeNodes];
   const actorById = new Map(nodes.map((node) => [node.id, node]));
-  const evaluatedConnections = evaluateConnectionPortfolio(connections, actorById);
-  const nodeHealth = new Map<string, ConnectionHealth>(
-    nodes.map((node) => [node.id, "normal" as ConnectionHealth]),
-  );
-
-  evaluatedConnections.forEach((connection) => {
-    const fromHealth = nodeHealth.get(connection.fromId) ?? "normal";
-    const toHealth = nodeHealth.get(connection.toId) ?? "normal";
-    if (CONNECTION_HEALTH_PRIORITY[connection.healthStatus] > CONNECTION_HEALTH_PRIORITY[fromHealth]) {
-      nodeHealth.set(connection.fromId, connection.healthStatus);
-    }
-    if (CONNECTION_HEALTH_PRIORITY[connection.healthStatus] > CONNECTION_HEALTH_PRIORITY[toHealth]) {
-      nodeHealth.set(connection.toId, connection.healthStatus);
-    }
-  });
-
-  const nodesWithHealth = nodes.map((node) => {
-    const healthStatus = nodeHealth.get(node.id) ?? "normal";
-    return {
-      ...node,
-      healthStatus,
-      healthColor: NODE_INDICATOR_COLOR[healthStatus],
-    };
-  });
+  const candidateConnections = [
+    ...stageOneNodes.flatMap((stageOneNode) =>
+      stageTwoNodes.map((stageTwoNode) => createActorConnection(stageOneNode, stageTwoNode, config.routeProfile)),
+    ),
+    ...stageTwoNodes.flatMap((stageTwoNode) =>
+      stageThreeNodes.map((stageThreeNode) => createActorConnection(stageTwoNode, stageThreeNode, config.routeProfile)),
+    ),
+  ];
+  const evaluatedConnections = evaluateConnectionPortfolio(activeConnections, candidateConnections, actorById);
+  const nodesWithHealth = enrichNodesWithHealth(nodes, evaluatedConnections);
 
   return { nodes: nodesWithHealth, connections: evaluatedConnections };
 };
 
-const buildGlobalSupplyActorNetwork = (
+const buildGlobalActorNetwork = (
   geojson: GeoJSON.FeatureCollection,
+  config: ActorNetworkConfigGlobal,
 ): { nodes: SupplyActorNode[]; connections: SupplyActorConnection[] } => {
   const countryIndex = new Map<string, ActorLocationCandidate>();
 
@@ -657,80 +895,128 @@ const buildGlobalSupplyActorNetwork = (
       })
       .filter((node): node is SupplyActorNode => Boolean(node));
 
-  const suppliers = mapActorNodes("supplier", SUPPLIER_GLOBAL_LOCATIONS);
-  const feedmills = mapActorNodes("feedmill", FEEDMILL_GLOBAL_LOCATIONS);
-  const farms = mapActorNodes("farm", FARM_GLOBAL_LOCATIONS);
+  const stageOneNodes = mapActorNodes(config.stageOneType, config.stageOneInputs);
+  const stageTwoNodes = mapActorNodes(config.stageTwoType, config.stageTwoInputs);
+  const stageThreeNodes = mapActorNodes(config.stageThreeType, config.stageThreeInputs);
 
-  const connections: SupplyActorConnection[] = [];
+  const activeConnections: SupplyActorConnection[] = [];
   const connectionSet = new Set<string>();
   const addConnection = (fromNode: SupplyActorNode, toNode: SupplyActorNode) => {
     const key = `${fromNode.id}->${toNode.id}`;
     if (connectionSet.has(key)) return;
     connectionSet.add(key);
-    const routeDistance = distanceKm(fromNode.coordinate, toNode.coordinate);
-    const routeSeed = hashString(key);
-    const isSupplierToFeedmill = fromNode.type === "supplier" && toNode.type === "feedmill";
-    const tonPerMonth = isSupplierToFeedmill
-      ? 180 + (routeSeed % 140)
-      : 90 + (routeSeed % 120);
-    const baseCostPerKg = isSupplierToFeedmill ? 420 : 560;
-    const distanceFactor = isSupplierToFeedmill ? 0.8 : 1.0;
-    const costPerKg = Math.round(baseCostPerKg + routeDistance * distanceFactor);
-    const totalCostMillionIdr = Number(((tonPerMonth * 1000 * costPerKg) / 1_000_000).toFixed(1));
-    connections.push({
-      id: key,
-      fromId: fromNode.id,
-      toId: toNode.id,
-      fromType: fromNode.type,
-      toType: toNode.type,
-      distanceKm: Number(routeDistance.toFixed(1)),
-      tonPerMonth,
-      costPerKg,
-      totalCostMillionIdr,
-      healthStatus: "normal",
-      healthColor: CONNECTION_HEALTH_STYLE.normal.color,
-      issue: "",
-      recommendation: "",
-    });
+    activeConnections.push(createActorConnection(fromNode, toNode, config.routeProfile));
   };
 
-  suppliers.forEach((supplier) => {
-    getNearestNodes(supplier, feedmills, 2).forEach((feedmill) => addConnection(supplier, feedmill));
+  connectActorStage({
+    sources: stageOneNodes,
+    targets: stageTwoNodes,
+    preferredCount: config.stageOnePreferredCount,
+    addConnection,
+    getConnections: () =>
+      activeConnections.filter(
+        (connection) => connection.fromType === config.stageOneType && connection.toType === config.stageTwoType,
+      ),
   });
 
-  feedmills.forEach((feedmill) => {
-    getNearestNodes(feedmill, farms, 3).forEach((farm) => addConnection(feedmill, farm));
+  connectActorStage({
+    sources: stageTwoNodes,
+    targets: stageThreeNodes,
+    preferredCount: config.stageTwoPreferredCount,
+    addConnection,
+    getConnections: () =>
+      activeConnections.filter(
+        (connection) => connection.fromType === config.stageTwoType && connection.toType === config.stageThreeType,
+      ),
   });
 
-  const nodes = [...suppliers, ...feedmills, ...farms];
+  const nodes = [...stageOneNodes, ...stageTwoNodes, ...stageThreeNodes];
   const actorById = new Map(nodes.map((node) => [node.id, node]));
-  const evaluatedConnections = evaluateConnectionPortfolio(connections, actorById);
-  const nodeHealth = new Map<string, ConnectionHealth>(
-    nodes.map((node) => [node.id, "normal" as ConnectionHealth]),
-  );
-
-  evaluatedConnections.forEach((connection) => {
-    const fromHealth = nodeHealth.get(connection.fromId) ?? "normal";
-    const toHealth = nodeHealth.get(connection.toId) ?? "normal";
-    if (CONNECTION_HEALTH_PRIORITY[connection.healthStatus] > CONNECTION_HEALTH_PRIORITY[fromHealth]) {
-      nodeHealth.set(connection.fromId, connection.healthStatus);
-    }
-    if (CONNECTION_HEALTH_PRIORITY[connection.healthStatus] > CONNECTION_HEALTH_PRIORITY[toHealth]) {
-      nodeHealth.set(connection.toId, connection.healthStatus);
-    }
-  });
-
-  const nodesWithHealth = nodes.map((node) => {
-    const healthStatus = nodeHealth.get(node.id) ?? "normal";
-    return {
-      ...node,
-      healthStatus,
-      healthColor: NODE_INDICATOR_COLOR[healthStatus],
-    };
-  });
+  const candidateConnections = [
+    ...stageOneNodes.flatMap((stageOneNode) =>
+      stageTwoNodes.map((stageTwoNode) => createActorConnection(stageOneNode, stageTwoNode, config.routeProfile)),
+    ),
+    ...stageTwoNodes.flatMap((stageTwoNode) =>
+      stageThreeNodes.map((stageThreeNode) => createActorConnection(stageTwoNode, stageThreeNode, config.routeProfile)),
+    ),
+  ];
+  const evaluatedConnections = evaluateConnectionPortfolio(activeConnections, candidateConnections, actorById);
+  const nodesWithHealth = enrichNodesWithHealth(nodes, evaluatedConnections);
 
   return { nodes: nodesWithHealth, connections: evaluatedConnections };
 };
+
+const FEED_FARM_LOCAL_NETWORK_CONFIG: ActorNetworkConfigLocal = {
+  stageOneType: "supplier",
+  stageTwoType: "feedmill",
+  stageThreeType: "farm",
+  stageOneInputs: SUPPLIER_LOCATIONS,
+  stageTwoInputs: FEEDMILL_LOCATIONS,
+  stageThreeInputs: FARM_LOCATIONS,
+  routeProfile: {
+    "supplier->feedmill": { tonBase: 140, tonVariance: 120, baseCostPerKg: 220, distanceFactor: 3.2 },
+    "feedmill->farm": { tonBase: 60, tonVariance: 90, baseCostPerKg: 350, distanceFactor: 4.5 },
+  },
+  stageOnePreferredCount: 2,
+  stageTwoPreferredCount: 3,
+};
+
+const FOOD_LOCAL_NETWORK_CONFIG: ActorNetworkConfigLocal = {
+  stageOneType: "supplier",
+  stageTwoType: "distributor",
+  stageThreeType: "retail",
+  stageOneInputs: SUPPLIER_LOCATIONS,
+  stageTwoInputs: DISTRIBUTOR_LOCATIONS,
+  stageThreeInputs: RETAIL_LOCATIONS,
+  routeProfile: {
+    "supplier->distributor": { tonBase: 120, tonVariance: 100, baseCostPerKg: 260, distanceFactor: 2.9 },
+    "distributor->retail": { tonBase: 70, tonVariance: 80, baseCostPerKg: 310, distanceFactor: 3.8 },
+  },
+  stageOnePreferredCount: 2,
+  stageTwoPreferredCount: 3,
+};
+
+const FEED_FARM_GLOBAL_NETWORK_CONFIG: ActorNetworkConfigGlobal = {
+  stageOneType: "supplier",
+  stageTwoType: "feedmill",
+  stageThreeType: "farm",
+  stageOneInputs: SUPPLIER_GLOBAL_LOCATIONS,
+  stageTwoInputs: FEEDMILL_GLOBAL_LOCATIONS,
+  stageThreeInputs: FARM_GLOBAL_LOCATIONS,
+  routeProfile: {
+    "supplier->feedmill": { tonBase: 180, tonVariance: 140, baseCostPerKg: 420, distanceFactor: 0.8 },
+    "feedmill->farm": { tonBase: 90, tonVariance: 120, baseCostPerKg: 560, distanceFactor: 1.0 },
+  },
+  stageOnePreferredCount: 2,
+  stageTwoPreferredCount: 3,
+};
+
+const FOOD_GLOBAL_NETWORK_CONFIG: ActorNetworkConfigGlobal = {
+  stageOneType: "supplier",
+  stageTwoType: "distributor",
+  stageThreeType: "retail",
+  stageOneInputs: SUPPLIER_GLOBAL_LOCATIONS,
+  stageTwoInputs: DISTRIBUTOR_GLOBAL_LOCATIONS,
+  stageThreeInputs: RETAIL_GLOBAL_LOCATIONS,
+  routeProfile: {
+    "supplier->distributor": { tonBase: 200, tonVariance: 140, baseCostPerKg: 470, distanceFactor: 0.9 },
+    "distributor->retail": { tonBase: 110, tonVariance: 110, baseCostPerKg: 540, distanceFactor: 1.1 },
+  },
+  stageOnePreferredCount: 2,
+  stageTwoPreferredCount: 3,
+};
+
+const buildSupplyActorNetwork = (geojson: GeoJSON.FeatureCollection) =>
+  buildLocalActorNetwork(geojson, FEED_FARM_LOCAL_NETWORK_CONFIG);
+
+const buildFoodActorNetwork = (geojson: GeoJSON.FeatureCollection) =>
+  buildLocalActorNetwork(geojson, FOOD_LOCAL_NETWORK_CONFIG);
+
+const buildGlobalSupplyActorNetwork = (geojson: GeoJSON.FeatureCollection) =>
+  buildGlobalActorNetwork(geojson, FEED_FARM_GLOBAL_NETWORK_CONFIG);
+
+const buildGlobalFoodActorNetwork = (geojson: GeoJSON.FeatureCollection) =>
+  buildGlobalActorNetwork(geojson, FOOD_GLOBAL_NETWORK_CONFIG);
 
 const buildColorExpressionStops = (
   legend: { minValue: number; maxValue: number; color: string }[],
@@ -787,34 +1073,8 @@ export interface MapSelection {
     provinceName: string;
     inboundSummary: { totalTonPerMonth: number; totalCostMillionIdr: number };
     outboundSummary: { totalTonPerMonth: number; totalCostMillionIdr: number };
-    inbound: Array<{
-      id: string;
-      type: SupplyActorType;
-      districtName: string;
-      provinceName: string;
-      tonPerMonth: number;
-      costPerKg: number;
-      totalCostMillionIdr: number;
-      distanceKm: number;
-      healthStatus: ConnectionHealth;
-      healthColor: string;
-      issue: string;
-      recommendation: string;
-    }>;
-    outbound: Array<{
-      id: string;
-      type: SupplyActorType;
-      districtName: string;
-      provinceName: string;
-      tonPerMonth: number;
-      costPerKg: number;
-      totalCostMillionIdr: number;
-      distanceKm: number;
-      healthStatus: ConnectionHealth;
-      healthColor: string;
-      issue: string;
-      recommendation: string;
-    }>;
+    inbound: ActorRouteSelection[];
+    outbound: ActorRouteSelection[];
   };
   district?: DistrictMarketData;
   districtSupply?: DistrictSupplyData;
@@ -837,7 +1097,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
 
   const legend = useMemo(() => getLegend(mode, scope), [mode, scope]);
   const metricLabel = getMetricLabel(mode, scope, supplyPerspective, legend?.metricLabel ?? "Score");
-  const showConnectionRisk = mode === "supply" && supplyPerspective === "mitra";
+  const showConnectionRisk = mode === "supply";
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -955,8 +1215,11 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           });
 
           let setActiveActor = (_actorId: string | null) => {};
-          if (mode === "supply" && supplyPerspective === "mitra") {
-            const actorNetwork = buildGlobalSupplyActorNetwork(geojson as GeoJSON.FeatureCollection);
+          if (mode === "supply") {
+            const actorNetwork =
+              supplyPerspective === "mitra"
+                ? buildGlobalSupplyActorNetwork(geojson as GeoJSON.FeatureCollection)
+                : buildGlobalFoodActorNetwork(geojson as GeoJSON.FeatureCollection);
             const actorById = new Map(actorNetwork.nodes.map((node) => [node.id, node]));
 
             const actorNodesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
@@ -1000,7 +1263,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                       connectionId: connection.id,
                       fromId: connection.fromId,
                       toId: connection.toId,
-                      recommendedToId: connection.recommendedToId ?? "",
+                      recommendedFromId: connection.recommendedFromId ?? "",
                       fromType: connection.fromType,
                       toType: connection.toType,
                       tonPerMonth: connection.tonPerMonth,
@@ -1012,11 +1275,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                     },
                   };
                 })
-                .filter(
-                  (
-                    feature,
-                  ): feature is GeoJSON.Feature<GeoJSON.LineString, Record<string, string>> => Boolean(feature),
-                ),
+                .filter(Boolean) as GeoJSON.Feature<GeoJSON.LineString>[],
             };
 
             const recommendationSet = new Set<string>();
@@ -1024,33 +1283,29 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
               type: "FeatureCollection",
               features: actorNetwork.connections
                 .map((connection) => {
-                  if (connection.healthStatus !== "risk" || !connection.recommendedToId) return null;
-                  const recommendationKey = `${connection.fromId}->${connection.recommendedToId}`;
+                  if (connection.healthStatus !== "risk" || !connection.recommendedFromId) return null;
+                  const recommendationKey = `${connection.recommendedFromId}->${connection.toId}`;
                   if (recommendationSet.has(recommendationKey)) return null;
                   recommendationSet.add(recommendationKey);
-                  const fromNode = actorById.get(connection.fromId);
-                  const recommendedNode = actorById.get(connection.recommendedToId);
-                  if (!fromNode || !recommendedNode) return null;
+                  const recommendedNode = actorById.get(connection.recommendedFromId);
+                  const targetNode = actorById.get(connection.toId);
+                  if (!recommendedNode || !targetNode) return null;
 
                   return {
                     type: "Feature" as const,
                     id: `rec-${connection.id}`,
                     geometry: {
                       type: "LineString" as const,
-                      coordinates: [fromNode.coordinate, recommendedNode.coordinate],
+                      coordinates: [recommendedNode.coordinate, targetNode.coordinate],
                     },
                     properties: {
-                      fromId: connection.fromId,
-                      toId: connection.recommendedToId,
-                      riskyToId: connection.toId,
+                      fromId: connection.recommendedFromId,
+                      toId: connection.toId,
+                      riskyFromId: connection.fromId,
                     },
                   };
                 })
-                .filter(
-                  (
-                    feature,
-                  ): feature is GeoJSON.Feature<GeoJSON.LineString, Record<string, string>> => Boolean(feature),
-                ),
+                .filter(Boolean) as GeoJSON.Feature<GeoJSON.LineString>[],
             };
 
             map.addSource("actor-nodes", { type: "geojson", data: actorNodesGeoJson });
@@ -1058,13 +1313,37 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
             map.addSource("actor-recommendations", { type: "geojson", data: actorRecommendationsGeoJson });
 
             map.addLayer({
+              id: "actor-connections-base",
+              type: "line",
+              source: "actor-connections",
+              paint: {
+                "line-color": ["case", ["==", ["get", "healthStatus"], "risk"], "#fca5a5", "#d1d5db"],
+                "line-opacity": 0.5,
+                "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 2.4, 1.8],
+              },
+              filter: ["==", ["get", "fromId"], "__none__"],
+            });
+
+            map.addLayer({
+              id: "actor-connections-active-casing",
+              type: "line",
+              source: "actor-connections",
+              paint: {
+                "line-color": "rgba(15, 23, 42, 0.38)",
+                "line-opacity": 0.95,
+                "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 5.1, 4.2],
+              },
+              filter: ["==", ["get", "fromId"], "__none__"],
+            });
+
+            map.addLayer({
               id: "actor-connections-active",
               type: "line",
               source: "actor-connections",
               paint: {
-                "line-color": ["case", ["==", ["get", "healthStatus"], "risk"], "#dc2626", "#111827"],
-                "line-opacity": 0.8,
-                "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 3.2, 2.5],
+                "line-color": ["case", ["==", ["get", "healthStatus"], "risk"], "#dc2626", "#ffffff"],
+                "line-opacity": 0.95,
+                "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 3.8, 3.0],
               },
               filter: ["==", ["get", "fromId"], "__none__"],
             });
@@ -1076,7 +1355,8 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
               paint: {
                 "line-color": "#16a34a",
                 "line-width": 1.4,
-                "line-opacity": 0.95,
+                "line-opacity": 0.28,
+                "line-dasharray": [2, 2],
               },
               filter: ["==", ["get", "fromId"], "__none__"],
             });
@@ -1162,12 +1442,13 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                     ["==", ["get", "toId"], actorId],
                   ]
                 : ["==", ["get", "fromId"], "__none__"];
-              const activeActorType = actorId ? actorById.get(actorId)?.type : undefined;
               const recommendationFilter =
-                actorId && activeActorType === "feedmill"
-                  ? ["==", ["get", "fromId"], actorId]
+                actorId
+                  ? ["==", ["get", "toId"], actorId]
                   : ["==", ["get", "fromId"], "__none__"];
 
+              map.setFilter("actor-connections-base", activeFilter as ExpressionSpecification);
+              map.setFilter("actor-connections-active-casing", activeFilter as ExpressionSpecification);
               map.setFilter("actor-connections-active", activeFilter as ExpressionSpecification);
               map.setFilter("actor-recommendations-base", recommendationFilter as ExpressionSpecification);
               map.setFilter("actor-recommendations-active", recommendationFilter as ExpressionSpecification);
@@ -1222,26 +1503,12 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                     healthColor: connection.healthColor,
                     issue: connection.issue,
                     recommendation: connection.recommendation,
+                    recommendedNodeName: connection.recommendedFromId
+                      ? actorById.get(connection.recommendedFromId)?.districtName
+                      : undefined,
                   };
                 })
-                .filter(
-                  (
-                    node,
-                  ): node is {
-                    id: string;
-                    type: SupplyActorType;
-                    districtName: string;
-                    provinceName: string;
-                    tonPerMonth: number;
-                    costPerKg: number;
-                    totalCostMillionIdr: number;
-                    distanceKm: number;
-                    healthStatus: ConnectionHealth;
-                    healthColor: string;
-                    issue: string;
-                    recommendation: string;
-                  } => Boolean(node),
-                );
+                .filter(Boolean) as ActorRouteSelection[];
 
               const outbound = actorNetwork.connections
                 .filter((connection) => connection.fromId === actor.id)
@@ -1261,26 +1528,12 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                     healthColor: connection.healthColor,
                     issue: connection.issue,
                     recommendation: connection.recommendation,
+                    recommendedNodeName: connection.recommendedFromId
+                      ? actorById.get(connection.recommendedFromId)?.districtName
+                      : undefined,
                   };
                 })
-                .filter(
-                  (
-                    node,
-                  ): node is {
-                    id: string;
-                    type: SupplyActorType;
-                    districtName: string;
-                    provinceName: string;
-                    tonPerMonth: number;
-                    costPerKg: number;
-                    totalCostMillionIdr: number;
-                    distanceKm: number;
-                    healthStatus: ConnectionHealth;
-                    healthColor: string;
-                    issue: string;
-                    recommendation: string;
-                  } => Boolean(node),
-                );
+                .filter(Boolean) as ActorRouteSelection[];
 
               const inboundSummary = inbound.reduce(
                 (acc, item) => ({
@@ -1325,7 +1578,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           }
 
           map.on("mousemove", "countries-fill", (event) => {
-            if (mode === "supply" && supplyPerspective === "mitra") {
+            if (mode === "supply") {
               const actorHits = map.queryRenderedFeatures(event.point, { layers: ["actor-pins-hitbox"] });
               if (actorHits.length > 0) {
                 return;
@@ -1358,7 +1611,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           });
 
           map.on("click", "countries-fill", (event) => {
-            if (mode === "supply" && supplyPerspective === "mitra") {
+            if (mode === "supply") {
               const actorHits = map.queryRenderedFeatures(event.point, { layers: ["actor-pins-hitbox"] });
               if (actorHits.length > 0) {
                 return;
@@ -1462,8 +1715,11 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
         });
 
         let setActiveActor = (_actorId: string | null) => {};
-        if (mode === "supply" && supplyPerspective === "mitra") {
-          const actorNetwork = buildSupplyActorNetwork(geojson as GeoJSON.FeatureCollection);
+        if (mode === "supply") {
+          const actorNetwork =
+            supplyPerspective === "mitra"
+              ? buildSupplyActorNetwork(geojson as GeoJSON.FeatureCollection)
+              : buildFoodActorNetwork(geojson as GeoJSON.FeatureCollection);
           const actorById = new Map(actorNetwork.nodes.map((node) => [node.id, node]));
 
           const actorNodesGeoJson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
@@ -1506,7 +1762,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                     connectionId: connection.id,
                     fromId: connection.fromId,
                     toId: connection.toId,
-                    recommendedToId: connection.recommendedToId ?? "",
+                    recommendedFromId: connection.recommendedFromId ?? "",
                     fromType: connection.fromType,
                     toType: connection.toType,
                     tonPerMonth: connection.tonPerMonth,
@@ -1518,11 +1774,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                   },
                 };
               })
-              .filter(
-                (
-                  feature,
-                ): feature is GeoJSON.Feature<GeoJSON.LineString, Record<string, string>> => Boolean(feature),
-                ),
+              .filter(Boolean) as GeoJSON.Feature<GeoJSON.LineString>[],
             };
 
           const recommendationSet = new Set<string>();
@@ -1530,33 +1782,29 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
             type: "FeatureCollection",
             features: actorNetwork.connections
               .map((connection) => {
-                if (connection.healthStatus !== "risk" || !connection.recommendedToId) return null;
-                const recommendationKey = `${connection.fromId}->${connection.recommendedToId}`;
+                if (connection.healthStatus !== "risk" || !connection.recommendedFromId) return null;
+                const recommendationKey = `${connection.recommendedFromId}->${connection.toId}`;
                 if (recommendationSet.has(recommendationKey)) return null;
                 recommendationSet.add(recommendationKey);
-                const fromNode = actorById.get(connection.fromId);
-                const recommendedNode = actorById.get(connection.recommendedToId);
-                if (!fromNode || !recommendedNode) return null;
+                const recommendedNode = actorById.get(connection.recommendedFromId);
+                const targetNode = actorById.get(connection.toId);
+                if (!recommendedNode || !targetNode) return null;
 
                 return {
                   type: "Feature" as const,
                   id: `rec-${connection.id}`,
                   geometry: {
                     type: "LineString" as const,
-                    coordinates: [fromNode.coordinate, recommendedNode.coordinate],
+                    coordinates: [recommendedNode.coordinate, targetNode.coordinate],
                   },
                   properties: {
-                    fromId: connection.fromId,
-                    toId: connection.recommendedToId,
-                    riskyToId: connection.toId,
+                    fromId: connection.recommendedFromId,
+                    toId: connection.toId,
+                    riskyFromId: connection.fromId,
                   },
                 };
               })
-              .filter(
-                (
-                  feature,
-                ): feature is GeoJSON.Feature<GeoJSON.LineString, Record<string, string>> => Boolean(feature),
-              ),
+              .filter(Boolean) as GeoJSON.Feature<GeoJSON.LineString>[],
           };
 
           map.addSource("actor-nodes", { type: "geojson", data: actorNodesGeoJson });
@@ -1564,13 +1812,37 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           map.addSource("actor-recommendations", { type: "geojson", data: actorRecommendationsGeoJson });
 
           map.addLayer({
+            id: "actor-connections-base",
+            type: "line",
+            source: "actor-connections",
+            paint: {
+              "line-color": ["case", ["==", ["get", "healthStatus"], "risk"], "#fca5a5", "#d1d5db"],
+              "line-opacity": 0.5,
+              "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 2.4, 1.8],
+            },
+            filter: ["==", ["get", "fromId"], "__none__"],
+          });
+
+          map.addLayer({
+            id: "actor-connections-active-casing",
+            type: "line",
+            source: "actor-connections",
+            paint: {
+              "line-color": "rgba(15, 23, 42, 0.38)",
+              "line-opacity": 0.95,
+              "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 5.1, 4.2],
+            },
+            filter: ["==", ["get", "fromId"], "__none__"],
+          });
+
+          map.addLayer({
             id: "actor-connections-active",
             type: "line",
             source: "actor-connections",
             paint: {
-              "line-color": ["case", ["==", ["get", "healthStatus"], "risk"], "#dc2626", "#111827"],
-              "line-opacity": 0.8,
-              "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 3.2, 2.5],
+              "line-color": ["case", ["==", ["get", "healthStatus"], "risk"], "#dc2626", "#ffffff"],
+              "line-opacity": 0.95,
+              "line-width": ["case", ["==", ["get", "healthStatus"], "risk"], 3.8, 3.0],
             },
             filter: ["==", ["get", "fromId"], "__none__"],
           });
@@ -1582,7 +1854,8 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
             paint: {
               "line-color": "#16a34a",
               "line-width": 1.4,
-              "line-opacity": 0.95,
+              "line-opacity": 0.28,
+              "line-dasharray": [2, 2],
             },
             filter: ["==", ["get", "fromId"], "__none__"],
           });
@@ -1669,12 +1942,13 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                   ["==", ["get", "toId"], actorId],
                 ]
               : ["==", ["get", "fromId"], "__none__"];
-            const activeActorType = actorId ? actorById.get(actorId)?.type : undefined;
             const recommendationFilter =
-              actorId && activeActorType === "feedmill"
-                ? ["==", ["get", "fromId"], actorId]
+              actorId
+                ? ["==", ["get", "toId"], actorId]
                 : ["==", ["get", "fromId"], "__none__"];
 
+            map.setFilter("actor-connections-base", activeFilter as ExpressionSpecification);
+            map.setFilter("actor-connections-active-casing", activeFilter as ExpressionSpecification);
             map.setFilter("actor-connections-active", activeFilter as ExpressionSpecification);
             map.setFilter("actor-recommendations-base", recommendationFilter as ExpressionSpecification);
             map.setFilter("actor-recommendations-active", recommendationFilter as ExpressionSpecification);
@@ -1729,26 +2003,12 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                   healthColor: connection.healthColor,
                   issue: connection.issue,
                   recommendation: connection.recommendation,
+                  recommendedNodeName: connection.recommendedFromId
+                    ? actorById.get(connection.recommendedFromId)?.districtName
+                    : undefined,
                 };
               })
-              .filter(
-                (
-                  node,
-                ): node is {
-                  id: string;
-                  type: SupplyActorType;
-                  districtName: string;
-                  provinceName: string;
-                  tonPerMonth: number;
-                  costPerKg: number;
-                  totalCostMillionIdr: number;
-                  distanceKm: number;
-                  healthStatus: ConnectionHealth;
-                  healthColor: string;
-                  issue: string;
-                  recommendation: string;
-                } => Boolean(node),
-              );
+              .filter(Boolean) as ActorRouteSelection[];
 
             const outbound = actorNetwork.connections
               .filter((connection) => connection.fromId === actor.id)
@@ -1768,26 +2028,12 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                   healthColor: connection.healthColor,
                   issue: connection.issue,
                   recommendation: connection.recommendation,
+                  recommendedNodeName: connection.recommendedFromId
+                    ? actorById.get(connection.recommendedFromId)?.districtName
+                    : undefined,
                 };
               })
-              .filter(
-                (
-                  node,
-                ): node is {
-                  id: string;
-                  type: SupplyActorType;
-                  districtName: string;
-                  provinceName: string;
-                  tonPerMonth: number;
-                  costPerKg: number;
-                  totalCostMillionIdr: number;
-                  distanceKm: number;
-                  healthStatus: ConnectionHealth;
-                  healthColor: string;
-                  issue: string;
-                  recommendation: string;
-                } => Boolean(node),
-              );
+              .filter(Boolean) as ActorRouteSelection[];
 
             const inboundSummary = inbound.reduce(
               (acc, item) => ({
@@ -1837,7 +2083,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
         }
 
         map.on("mousemove", "id-kabkota-fill", (event) => {
-          if (mode === "supply" && supplyPerspective === "mitra") {
+          if (mode === "supply") {
             const actorHits = map.queryRenderedFeatures(event.point, { layers: ["actor-pins-hitbox"] });
             if (actorHits.length > 0) {
               return;
@@ -1873,7 +2119,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
         });
 
         map.on("click", "id-kabkota-fill", (event) => {
-          if (mode === "supply" && supplyPerspective === "mitra") {
+          if (mode === "supply") {
             const actorHits = map.queryRenderedFeatures(event.point, { layers: ["actor-pins-hitbox"] });
             if (actorHits.length > 0) {
               return;
@@ -1992,7 +2238,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
                 </p>
                 <ul className="space-y-1.5">
                   <li className="flex items-center gap-2">
-                    <span className="h-[2px] w-5 rounded-full bg-[#111827]" />
+                    <span className="h-[2px] w-5 rounded-full border border-slate-400 bg-white" />
                     <span className="text-[10px] text-muted-foreground">Normal</span>
                   </li>
                   <li className="flex items-center gap-2">
@@ -2024,7 +2270,7 @@ const MapDashboard = ({ scope, mode, supplyPerspective, onRegionSelect }: MapDas
           {showConnectionRisk && (
             <div className="mt-2 border-t border-border pt-1.5">
               <p className="text-[10px] leading-relaxed text-muted-foreground">
-                Pin merah: node punya minimal satu koneksi berisiko tinggi. Pin putih: tidak ada koneksi berisiko tinggi.
+                Pin putih: Seluruh koneksi sudah optimal. Pin merah: Terdapat koneksi yang tidak efisien.
               </p>
             </div>
           )}
